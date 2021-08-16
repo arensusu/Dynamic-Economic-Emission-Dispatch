@@ -1,0 +1,16 @@
+bin/
+obj/
+Debug/
+Release/
+.vs/
+*.layout
+*.cbp
+*.depend
+*.sln
+*.vcxproj
+*.filters
+*.user
+*.py
+*.jpg
+*.png
+*.pdf
