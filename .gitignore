@@ -3,6 +3,7 @@ obj/
 Debug/
 Release/
 .vs/
+.vscode/
 *.layout
 *.cbp
 *.depend

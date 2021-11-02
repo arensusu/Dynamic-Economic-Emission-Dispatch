@@ -3,13 +3,15 @@
 
 #include <string>
 
-class BaseProblem
+class BProblem
 {
 public:
-    explicit BaseProblem(std::string& name) : name_(name) {}
-    ~BaseProblem() {}
+    explicit BProblem() { setName(""); }
+    ~BProblem() {}
 
-    virtual void read(std::string&) = 0;
+    void setName(const std::string& name) { name_ = name; }
+
+    virtual int read(const std::string&) = 0;
 
 protected:
     std::string name_;
