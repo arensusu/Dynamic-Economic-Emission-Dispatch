@@ -3,7 +3,7 @@
 
 #include <vector>
 
-class BaseProblem;
+#include "problem_base.h"
 
 class Individual
 {
@@ -11,11 +11,20 @@ public:
     explicit Individual() {}
     ~Individual() {}
 
-private:
-    std::vector<double> chromo_;
-    double objective_;
+    const std::vector<double>& encoding() const { return encoding_; }
+    std::vector<double>& encoding() { return encoding_; }
 
-    static BaseProblem* prob;
+    const double objective(const int i) const { return objective_[i]; }
+    double& objective(const int i) { return objective_[i]; }
+
+    static void SetProblem(const BProblem& prob) { problem_ = &prob; }
+    static const BProblem& prob() { return *problem_; }
+    
+private:
+    std::vector<double> encoding_;
+    std::vector<double> objective_;
+
+    static const BProblem* problem_;
 };
 
 #endif

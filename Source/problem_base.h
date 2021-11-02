@@ -3,15 +3,21 @@
 
 #include <string>
 
+class Individual;
+
 class BProblem
 {
 public:
-    explicit BProblem() { setName(""); }
+    explicit BProblem(const std::string name) : name_(name) { }
     ~BProblem() {}
 
-    void setName(const std::string& name) { name_ = name; }
+    void SetName(const std::string& name) { name_ = name; }
 
-    virtual int read(const std::string&) = 0;
+    virtual int numVariables() const = 0;
+    virtual int numObjectives() const = 0;
+
+    virtual bool Read(const std::string&) = 0;
+    virtual bool Evaluate(Individual&) const = 0;
 
 protected:
     std::string name_;

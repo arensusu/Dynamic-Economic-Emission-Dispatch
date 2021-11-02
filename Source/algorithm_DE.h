@@ -4,31 +4,23 @@
 #include <fstream>
 
 #include "algorithm_base.h"
-#include "population.h"
 
 class DE : public BaseEA
 {
 public:
-    explicit DE() : BaseEA("DE"), F_(0), CR_(0) {}
+    explicit DE() : BaseEA("DE"), maxffe_(1000), Psize_(20), F_(0.5), CR_(0.5) {}
     ~DE() {}
 
-    void setup(std::ifstream&);
+    virtual bool Setup(std::ifstream&);
 
-    virtual void operator() (Population&);
-
-    void initialization();
-    void mutation();
-    void crossover();
-    void selection();
+    virtual void Solve (Population&, const BProblem&);
 
 private:
-    Population pop_;
-    Individual current_;
-    Individual trial_;
-
-    int iteration;
+    int maxffe_;
+    size_t Psize_;
     double F_;
     double CR_;
+
 };
 
 #endif

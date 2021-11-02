@@ -1,55 +1,55 @@
 
+#include <fstream>
 
 #include "algorithm_DE.h"
 #include "population.h"
+#include "problem_base.h"
 
 using namespace std;
 
-void DE::setup(ifstream& file)
+bool DE::Setup(ifstream& file)
 {
-    if (file.eof())
-    {
-        iteration = 100;
-        F_ = 0.5;
-        CR_ = 0.5;
-    }
+    string dummy;
+
+    file >> dummy >> dummy >> name_;
+    file >> dummy >> dummy >> maxffe_;
+    file >> dummy >> dummy >> Psize_;
+    file >> dummy >> dummy >> F_;
+    file >> dummy >> dummy >> CR_;
+
+    return true;
 }
 
-void DE::operator() (Population& pop)
+void DE::Solve(Population& sol, const BProblem& prob)
 {
-    initialization();
-    pop = pop_;
+    Population pop[2] = { Population(Psize_) };
+    int cur = 0, next = 1;
+    int ffe = 0;
 
-    for (int i = 0; i < iteration_; ++i)
+    //initialization
+    for (size_t i = 0; i < Psize_; ++i)
     {
-        pop_.clear();
-        for (size_t j = 0; j < pop_.size(); ++j)
+        //CH
+        prob.Evaluate(pop[cur][i]);
+        ffe++;
+    }
+
+    while (ffe < maxffe_)
+    {
+        pop[cur].resize(Psize_ * 2);
+        for (size_t i = 0; i < Psize_; ++i)
         {
-            mutation();
-            crossover();
-            selection();
+            //mutation
+
+            //crossover
+
+            //CH
+            prob.Evaluate(pop[cur][Psize_ + i]);
+            ffe++;
         }
+        //selection
 
-        pop = pop_;
+        //print objectives
     }
-}
-
-void DE::initialization()
-{
-    
-}
-
-void DE::mutation()
-{
-
-}
-
-void DE::crossover()
-{
-
-}
-
-void DE::selection()
-{
-
+    return;
 }
