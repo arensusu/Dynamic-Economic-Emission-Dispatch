@@ -20,6 +20,9 @@ public:
     static void SetProblem(const BProblem& prob) { problem_ = &prob; }
     static const BProblem& prob() { return *problem_; }
     
+    const double operator[](const int i) const { return encoding_[i]; }
+    double& operator[](const int i) { return encoding_[i]; }
+
 private:
     std::vector<double> encoding_;
     std::vector<double> objective_;

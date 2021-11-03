@@ -1,12 +1,12 @@
 #ifndef XOVER__
 #define XOVER__
 
-class Population;
+class Individual;
 
 class BinaryCrossover
 {
 public:
-    void operator()(Population&, const int) const;
+    void operator()(const Individual&, Individual&, const double) const;
 };
 
 #endif

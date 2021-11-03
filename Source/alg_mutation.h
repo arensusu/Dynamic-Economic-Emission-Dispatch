@@ -6,7 +6,7 @@ class Population;
 class RandOneMutation
 {
 public:
-    void operator()(Population&) const;
+    void operator()(Population&, const double, const int) const;
 };
 
 #endif
