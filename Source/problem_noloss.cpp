@@ -6,42 +6,48 @@
 
 using namespace std;
 
-bool NProblem::SetCoeff(ifstream& file, const int numMachine)
+bool NProblem::SetCoeff(ifstream& file)
 {
-    int numCoeff = 14;
-    coeff_.resize(numMachine, vector<double>(numCoeff, 0));
+    int numCoeff = 10;
+    limits_.resize(numMachines_, vector<double>(2, 0));
+    coeffs_.resize(numMachines_, vector<double>(numCoeff, 0));
+    ramps_.resize(numMachines_, vector<double>(2, 0));
     string dummy;
 
     file >> dummy;
     int i = -1, j = -1;
-    for (i = 0; i < numMachine; ++i)
+    for (i = 0; i < numMachines_; ++i)
     {
+        file >> limits_[i][0] >> limits_[i][1];
+
         for (j = 0; j < numCoeff; ++j)
         {
-            file >> coeff_[i][j];
+            file >> coeffs_[i][j];
         }
+
+        file >> ramps_[i][0] >> ramps_[i][1];
     }
 
-    if (i < numMachine || j < numCoeff)
+    if (i < numMachines_ || j < numCoeff)
     {
         return false;
     }
     return true;
 }
 
-bool NProblem::SetLoad(ifstream& file, const int numPeriod)
+bool NProblem::SetLoad(ifstream& file)
 {
-    load_.resize(numPeriod, 0);
+    loads_.resize(numPeriods_, 0);
     string dummy;
 
     file >> dummy;
     int i;
-    for (i = 0; i < numPeriod; ++i)
+    for (i = 0; i < numPeriods_; ++i)
     {
-        file >> load_[i];
+        file >> loads_[i];
     }
 
-    if (i < numPeriod)
+    if (i < numPeriods_)
     {
         return false;
     }
@@ -53,12 +59,12 @@ bool NProblem::Read(const string& filename)
     //modify path
     ifstream file(filename, ios::in);
     
-    if (!SetCoeff(file, numMachines_))
+    if (!SetCoeff(file))
     {
         return false;
     }
 
-    if(!SetLoad(file, numPeriods_))
+    if(!SetLoad(file))
     {
         return false;
     }
@@ -85,8 +91,8 @@ bool NProblem::Evaluate(Individual& ind) const
     {
         return false;
     }
-    ind.objective(0) = cost;
-    ind.objective(1) = emission;
+    ind.objs()[0] = cost;
+    ind.objs()[1] = emission;
 
     return true;
 }

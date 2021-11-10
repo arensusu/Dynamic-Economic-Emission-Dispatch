@@ -1,24 +1,24 @@
 
-#include "problem_Bloss.h"
+#include "problem_with_B0.h"
 
 using namespace std;
 
-bool BLProblem::SetB(ifstream& file, const int numMachine)
+bool WBProblem::SetB(ifstream& file)
 {
-    B2_.resize(numMachine, vector<double>(numMachine, 0));
+    B2_.resize(numMachines_, vector<double>(numMachines_, 0));
     string dummy;
 
     file >> dummy;
     int i = -1, j = -1;
-    for (i = 0; i < numMachine; ++i)
+    for (i = 0; i < numMachines_; ++i)
     {
-        for (j = 0; j < numMachine; ++j)
+        for (j = 0; j < numMachines_; ++j)
         {
             file >> B2_[i][j];
         }
     }
 
-    if (i < numMachine || j < numMachine)
+    if (i < numMachines_ || j < numMachines_)
     {
         return false;
     }
@@ -28,15 +28,15 @@ bool BLProblem::SetB(ifstream& file, const int numMachine)
         return true;
     }
 
-    B1_.resize(numMachine, 0);
+    B1_.resize(numMachines_, 0);
 
     file >> dummy;
-    for (int i = 0; i < numMachine; ++i)
+    for (int i = 0; i < numMachines_; ++i)
     {
         file >> B1_[i];
     }
 
-    if (i < numMachine)
+    if (i < numMachines_)
     {
         return false;
     }
@@ -55,17 +55,17 @@ bool BLProblem::SetB(ifstream& file, const int numMachine)
 
 }
 
-bool BLProblem::Read(const string& name)
+bool WBProblem::Read(const string& name)
 {
     //modify path
     ifstream fileC(name, ios::in);
 
-    if (!SetCoeff(fileC, numMachines_))
+    if (!SetCoeff(fileC))
     {
         return false;
     }
 
-    if (!SetLoad(fileC, numPeriods_))
+    if (!SetLoad(fileC))
     {
         return false;
     }
@@ -73,7 +73,7 @@ bool BLProblem::Read(const string& name)
     //modify path
     ifstream fileB(name, ios::in);
 
-    if (!SetB(fileB, numMachines_))
+    if (!SetB(fileB))
     {
         return false;
     }

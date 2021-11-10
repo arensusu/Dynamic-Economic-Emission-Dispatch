@@ -2,12 +2,11 @@
 #define CH__
 
 class Individual;
-class BProblem;
 
 class DivisionCH
 {
 public:
-    void operator()(Individual&, const BProblem&) const;
+    void operator()(Individual &) const;
 };
 
 #endif
