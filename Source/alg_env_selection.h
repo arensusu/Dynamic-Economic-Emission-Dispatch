@@ -3,10 +3,10 @@
 
 class Population;
 
-class EnvSelection
+class BasicEnvSelection
 {
 public:
-    void operator()(Population&, Population&, unsigned int) const;
+    void operator()(Population&, Population&) const;
 };
 
 #endif

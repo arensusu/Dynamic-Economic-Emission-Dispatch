@@ -14,8 +14,8 @@ public:
     const std::vector<double>& encoding() const { return encoding_; }
     std::vector<double>& encoding() { return encoding_; }
 
-    const double objective(const int i) const { return objective_[i]; }
-    double& objective(const int i) { return objective_[i]; }
+    const std::vector<double>& objs() const { return objectives_; }
+    std::vector<double>& objs() { return objectives_; }
 
     static void SetProblem(const BProblem& prob) { problem_ = &prob; }
     static const BProblem& prob() { return *problem_; }
@@ -25,7 +25,7 @@ public:
 
 private:
     std::vector<double> encoding_;
-    std::vector<double> objective_;
+    std::vector<double> objectives_;
 
     static const BProblem* problem_;
 };
