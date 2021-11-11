@@ -22,10 +22,10 @@ public:
     virtual const double B1(const int i) const { return std::numeric_limits<double>::min(); }
     virtual const double B0() const { return std::numeric_limits<double>::min(); }
 
-    virtual int numPeriods() const { return numPeriods_; }
-    virtual int numMachines() const { return numMachines_; }
-    virtual int numVariables() const { return numMachines_ * numPeriods_; }
-    virtual int numObjectives() const { return numObjectives_; }
+    virtual size_t numPeriods() const { return numPeriods_; }
+    virtual size_t numMachines() const { return numMachines_; }
+    virtual size_t numVariables() const { return numMachines_ * numPeriods_; }
+    virtual size_t numObjectives() const { return numObjectives_; }
 
     virtual bool Read(const std::string&);
     virtual bool Evaluate(Individual&) const;
@@ -36,9 +36,9 @@ protected:
     std::vector<std::vector<double>> ramps_;
     std::vector<double> loads_;
 
-    int numMachines_;
-    int numPeriods_;
-    int numObjectives_;
+    std::size_t numMachines_;
+    std::size_t numPeriods_;
+    std::size_t numObjectives_;
 
     bool SetCoeff(std::ifstream&);
     bool SetLoad(std::ifstream&);

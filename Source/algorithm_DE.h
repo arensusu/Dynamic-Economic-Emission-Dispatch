@@ -1,8 +1,6 @@
 #ifndef ALGO_DE__
 #define ALGO_DE__
 
-#include <fstream>
-
 #include "algorithm_base.h"
 
 class DE : public BaseEA
@@ -13,7 +11,7 @@ public:
 
     virtual bool Setup(std::ifstream&);
 
-    virtual void Solve (Population&, const BProblem&);
+    virtual void Solve (Population&, const BProblem&, Log&);
 
 private:
     int maxffe_;

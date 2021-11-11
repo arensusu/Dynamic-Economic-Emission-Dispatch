@@ -9,7 +9,7 @@ bool WBProblem::SetB(ifstream& file)
     string dummy;
 
     file >> dummy;
-    int i = -1, j = -1;
+    size_t i = -1, j = -1;
     for (i = 0; i < numMachines_; ++i)
     {
         for (j = 0; j < numMachines_; ++j)
@@ -31,7 +31,7 @@ bool WBProblem::SetB(ifstream& file)
     B1_.resize(numMachines_, 0);
 
     file >> dummy;
-    for (int i = 0; i < numMachines_; ++i)
+    for (size_t i = 0; i < numMachines_; ++i)
     {
         file >> B1_[i];
     }

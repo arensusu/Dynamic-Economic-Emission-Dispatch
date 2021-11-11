@@ -2,6 +2,7 @@
 #define INDIVIDUAL__
 
 #include <vector>
+#include <iostream>
 
 #include "problem_base.h"
 
@@ -30,4 +31,5 @@ private:
     static const BProblem* problem_;
 };
 
+std::ostream& operator<<(std::ostream&, const Individual&);
 #endif

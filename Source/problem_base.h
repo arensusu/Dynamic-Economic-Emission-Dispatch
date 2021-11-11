@@ -23,10 +23,10 @@ public:
     virtual const double B1(const int i) const = 0;
     virtual const double B0() const = 0;
 
-    virtual int numPeriods() const = 0;
-    virtual int numMachines() const = 0;
-    virtual int numVariables() const = 0;
-    virtual int numObjectives() const = 0;
+    virtual size_t numPeriods() const = 0;
+    virtual size_t numMachines() const = 0;
+    virtual size_t numVariables() const = 0;
+    virtual size_t numObjectives() const = 0;
 
     virtual bool Read(const std::string&) = 0;
     virtual bool Evaluate(Individual&) const = 0;

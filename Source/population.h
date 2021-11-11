@@ -3,7 +3,7 @@
 
 #include <vector>
 
-class Individual;
+#include "individual.h"
 
 class Population
 {

@@ -6,7 +6,7 @@ class Population;
 class BasicEnvSelection
 {
 public:
-    void operator()(Population&, Population&) const;
+    size_t operator()(Population&, Population&) const;
 };
 
 #endif

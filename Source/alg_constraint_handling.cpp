@@ -1,5 +1,6 @@
 
 #include <limits>
+#include <algorithm>
 
 #include "alg_constraint_handling.h"
 #include "individual.h"

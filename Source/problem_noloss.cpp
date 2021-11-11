@@ -8,14 +8,14 @@ using namespace std;
 
 bool NProblem::SetCoeff(ifstream& file)
 {
-    int numCoeff = 10;
+    size_t numCoeff = 10;
     limits_.resize(numMachines_, vector<double>(2, 0));
     coeffs_.resize(numMachines_, vector<double>(numCoeff, 0));
     ramps_.resize(numMachines_, vector<double>(2, 0));
     string dummy;
 
     file >> dummy;
-    int i = -1, j = -1;
+    size_t i = -1, j = -1;
     for (i = 0; i < numMachines_; ++i)
     {
         file >> limits_[i][0] >> limits_[i][1];
@@ -41,7 +41,7 @@ bool NProblem::SetLoad(ifstream& file)
     string dummy;
 
     file >> dummy;
-    int i;
+    size_t i;
     for (i = 0; i < numPeriods_; ++i)
     {
         file >> loads_[i];
@@ -76,7 +76,7 @@ bool NProblem::Evaluate(Individual& ind) const
     const vector<double> encoding = ind.encoding();
     double cost = 0, emission = 0;
 
-    int i = -1, j = -1;
+    size_t i = -1, j = -1;
     for (i = 0; i < numPeriods_; ++i)
     {
         for (j = 0; j < numMachines_; ++j)
