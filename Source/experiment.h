@@ -8,8 +8,8 @@
 class BaseEA;
 class BProblem;
 
-void SetExperiment(BaseEA*, std::vector<std::string>&, std::ifstream&);
+void SetExperiment(BaseEA**, std::vector<std::string>&, std::ifstream&);
 
-void SetProblemConf(BProblem*, std::string& name);
+void SetProblemType(BProblem**, const std::string& name);
 
 #endif

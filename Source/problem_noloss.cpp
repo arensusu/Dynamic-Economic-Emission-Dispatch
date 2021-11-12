@@ -8,13 +8,13 @@ using namespace std;
 
 bool NProblem::SetCoeff(ifstream& file)
 {
+    file >> numMachines_;
+
     size_t numCoeff = 10;
     limits_.resize(numMachines_, vector<double>(2, 0));
     coeffs_.resize(numMachines_, vector<double>(numCoeff, 0));
     ramps_.resize(numMachines_, vector<double>(2, 0));
-    string dummy;
 
-    file >> dummy;
     size_t i = -1, j = -1;
     for (i = 0; i < numMachines_; ++i)
     {
@@ -32,15 +32,16 @@ bool NProblem::SetCoeff(ifstream& file)
     {
         return false;
     }
+
     return true;
 }
 
 bool NProblem::SetLoad(ifstream& file)
 {
-    loads_.resize(numPeriods_, 0);
-    string dummy;
+    file >> numPeriods_;
 
-    file >> dummy;
+    loads_.resize(numPeriods_, 0);
+
     size_t i;
     for (i = 0; i < numPeriods_; ++i)
     {
@@ -54,10 +55,10 @@ bool NProblem::SetLoad(ifstream& file)
     return true;
 }
 
-bool NProblem::Read(const string& filename)
+bool NProblem::Read(const string& fname)
 {
     //modify path
-    ifstream file(filename, ios::in);
+    ifstream file("./Dataset/Generator/" + fname + ".txt", ios::in);
     
     if (!SetCoeff(file))
     {
@@ -68,6 +69,9 @@ bool NProblem::Read(const string& filename)
     {
         return false;
     }
+
+    file >> numObjectives_;
+
     return true;
 }
 

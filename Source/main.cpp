@@ -14,13 +14,13 @@ int main()
     ifstream exp("exp.ini", ios::in);
     vector<string> probList;
     BaseEA* ea = nullptr;
-    SetExperiment(ea, probList, exp);
+    SetExperiment(&ea, probList, exp);
     exp.close();
 
     for (size_t i = 0; i < probList.size(); ++i)
     {
         BProblem* prob = nullptr;
-
+        SetProblemType(&prob, probList[i]);
         /*
         int RUN = 20;
         for (int r = 0; r < RUN; ++r)

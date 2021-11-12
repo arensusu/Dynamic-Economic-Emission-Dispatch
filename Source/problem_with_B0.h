@@ -6,7 +6,7 @@
 class WBProblem : public WOBProblem
 {
 public:
-    explicit WBProblem(const int m, const int p, const int o, const std::string& name = "WithB0") : WOBProblem(m, p, o, name), B0_(-1) {}
+    explicit WBProblem(const std::string& name = "WithB0") : WOBProblem(name), B0_(-1) {}
     ~WBProblem() {}
 
     virtual const double B2(const int i, const int j) const { return B2_[i][j]; }

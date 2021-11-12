@@ -55,10 +55,10 @@ bool WBProblem::SetB(ifstream& file)
 
 }
 
-bool WBProblem::Read(const string& name)
+bool WBProblem::Read(const string& fname)
 {
     //modify path
-    ifstream fileC(name, ios::in);
+    ifstream fileC("./Dataset/Generator/" + fname + ".txt", ios::in);
 
     if (!SetCoeff(fileC))
     {
@@ -70,12 +70,15 @@ bool WBProblem::Read(const string& name)
         return false;
     }
 
+    fileC >> numObjectives_;
+
     //modify path
-    ifstream fileB(name, ios::in);
+    ifstream fileB("./Dataset/B_Coeff/" + fname + ".txt", ios::in);
 
     if (!SetB(fileB))
     {
         return false;
     }
+
     return true;
 }

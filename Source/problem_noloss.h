@@ -10,7 +10,7 @@
 class NProblem : public BProblem
 {
 public:
-    explicit NProblem(const int m, const int p, const int o, const std::string name = "NoLoss") : BProblem(name), numMachines_(m), numPeriods_(p), numObjectives_(o) {}
+    explicit NProblem(const std::string name = "NoLoss") : BProblem(name), numMachines_(0), numPeriods_(0), numObjectives_(0) {}
     ~NProblem() {}
 
     virtual const double limit(const int machine, const int i) const { return limits_[machine][i]; }
