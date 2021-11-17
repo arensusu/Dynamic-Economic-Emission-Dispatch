@@ -9,7 +9,7 @@ class BProblem
 {
 public:
     explicit BProblem(const std::string name) : name_(name) { }
-    ~BProblem() {}
+    virtual ~BProblem() {}
 
     void SetName(const std::string& name) { name_ = name; }
     //const std::string& name() const { return name_; }

@@ -85,9 +85,15 @@ bool NProblem::Evaluate(Individual& ind) const
     {
         for (j = 0; j < numMachines_; ++j)
         {
-            double power = encoding[i * numPeriods_ + numMachines_];
-            cost += coeff(j, 2) + coeff(j, 3) * power + coeff(j, 4) * pow(power, 2.0) + abs(coeff(j, 5) * sin(coeff(j, 6) * (coeff(j, 1) - power)));
-            emission += coeff(j, 7) + coeff(j, 8) * power + coeff(j, 9) * pow(power, 2.0) + coeff(j, 10) * exp(coeff(j, 11) * power);
+            double power = encoding[i * numMachines_ + j];
+            cost += coeff(j, 0)
+                  + coeff(j, 1) * power
+                  + coeff(j, 2) * pow(power, 2.0)
+                  + abs(coeff(j, 3) * sin(coeff(j, 4) * (limit(j, 0) - power)));
+            emission += coeff(j, 5)
+                      + coeff(j, 6) * power
+                      + coeff(j, 7) * pow(power, 2.0)
+                      + coeff(j, 8) * exp(coeff(j, 9) * power);
         }
     }
 
@@ -95,8 +101,8 @@ bool NProblem::Evaluate(Individual& ind) const
     {
         return false;
     }
-    ind.objs()[0] = cost;
-    ind.objs()[1] = emission;
+    ind.objs().push_back(cost);
+    ind.objs().push_back(emission);
 
     return true;
 }

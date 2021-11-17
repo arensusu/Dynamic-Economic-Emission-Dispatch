@@ -7,7 +7,7 @@ class WBProblem : public WOBProblem
 {
 public:
     explicit WBProblem(const std::string& name = "WithB0") : WOBProblem(name), B0_(-1) {}
-    ~WBProblem() {}
+    virtual ~WBProblem() {}
 
     virtual const double B2(const int i, const int j) const { return B2_[i][j]; }
     virtual const double B1(const int i) const { return B1_[i]; }

@@ -11,7 +11,7 @@ class NProblem : public BProblem
 {
 public:
     explicit NProblem(const std::string name = "NoLoss") : BProblem(name), numMachines_(0), numPeriods_(0), numObjectives_(0) {}
-    ~NProblem() {}
+    virtual ~NProblem() {}
 
     virtual const double limit(const int machine, const int i) const { return limits_[machine][i]; }
     virtual const double coeff(const int machine, const int coeffIndex) const { return coeffs_[machine][coeffIndex]; }
