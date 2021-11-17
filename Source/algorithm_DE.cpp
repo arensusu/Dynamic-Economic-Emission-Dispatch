@@ -49,10 +49,17 @@ void DE::Solve(Population& sol, const BProblem& prob, Log& log)
         prob.Evaluate(pop[curr][i]);
         ffe++;
     }
+    
+    log.Final(pop[curr]);
+    log.Trend(pop[curr], 20);
 
     while (ffe < maxffe_)
     {
+        pop[next].clear();
+        pop[next].resize(Psize_);
+
         pop[curr].resize(Psize_ * 2);
+
         for (size_t i = 0; i < Psize_; ++i)
         {
             //mutation
@@ -71,7 +78,7 @@ void DE::Solve(Population& sol, const BProblem& prob, Log& log)
         //print objectives
         log.Trend(pop[next], numPareto);
 
-        swap(curr, next);
+        swap(pop[curr], pop[next]);
     }
 
     sol = pop[curr];

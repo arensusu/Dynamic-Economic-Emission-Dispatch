@@ -26,7 +26,7 @@ void RandOneMutation::operator()(Population& pop, const double F, const int pos)
 
     vector<double>& mutant = pop[Psize + pos].encoding();
     mutant.resize(Individual::prob().numVariables());
-    for (size_t i = 0; i < Psize; ++i)
+    for (size_t i = 0; i < Individual::prob().numVariables(); ++i)
     {
         mutant[i] = pop[r1][i] + F * (pop[r2][i] - pop[r3][i]);
     }

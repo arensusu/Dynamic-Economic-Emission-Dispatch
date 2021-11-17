@@ -10,12 +10,15 @@ ostream& operator<<(ostream& os, const Individual& ind)
 {
     vector<double> powers = ind.encoding();
     
-    double sum = 0;
-    for (size_t i = 0; i < powers.size(); ++i)
+    for (size_t t = 0; t < Individual::prob().numPeriods(); ++t)
     {
-        sum += powers[i];
+        for (size_t i = 0; i < Individual::prob().numMachines(); ++i)
+        {
+            powers[t * Individual::prob().numMachines() + i] = Individual::prob().limit(i, 0) + powers[t * Individual::prob().numMachines() + i] * (Individual::prob().limit(i, 1) - Individual::prob().limit(i, 0));
+        }
     }
-    os << sum;
+
+    os << "Objectives: " << ind.objs()[0] << ", " << ind.objs()[1] << endl;
 
     for (size_t i = 0; i < powers.size(); ++i)
     {

@@ -14,7 +14,9 @@ void RandomInitialization::operator()(Population& pop, const BProblem& prob) con
     srand(time(NULL));
     for (size_t i = 0; i < pop.size(); ++i)
     {
-        vector<double> encoding = pop[i].encoding();
+        vector<double>& encoding = pop[i].encoding();
+        encoding.resize(prob.numVariables());
+
         for (size_t j = 0; j < prob.numVariables(); ++j)
         {
             encoding[j] = double(rand() % 100) / 100;

@@ -16,12 +16,12 @@ void InequalityConstraint(vector<double>& curr,
     {
         for (size_t i = 0; i < curr.size(); ++i)
         {
-            if (curr[i] > prob.limit(i, 0))
+            if (curr[i] < prob.limit(i, 0))
             {
                 curr[i] = prob.limit(i, 0);
             }
 
-            if (curr[i] < prob.limit(i, 1))
+            if (curr[i] > prob.limit(i, 1))
             {
                 curr[i] = prob.limit(i, 1);
             }
@@ -31,14 +31,14 @@ void InequalityConstraint(vector<double>& curr,
     {
         for (size_t i = 0; i < curr.size(); ++i)
         {
-            double upper = min(prob.limit(i, 0), prev[i] + prob.ramp(i, 0));
-            if (curr[i] > upper)
+            double upper = max(prob.limit(i, 0), prev[i] - prob.ramp(i, 0));
+            if (curr[i] < upper)
             {
                 curr[i] = upper;
             }
 
-            double lower = max(prob.limit(i, 1), prev[i] - prob.ramp(i, 1));
-            if (curr[i] < lower)
+            double lower = min(prob.limit(i, 1), prev[i] + prob.ramp(i, 1));
+            if (curr[i] > lower)
             {
                 curr[i] = lower;
             }
@@ -91,6 +91,11 @@ void DivisionCH::operator()(Individual& ind) const
     {
         vector<double> power_t(ind.encoding().begin() + t * prob.numMachines(), ind.encoding().begin() + (t + 1) * prob.numMachines());
 
+        for (size_t i = 0; i < power_t.size(); ++i)
+        {
+            power_t[i] = prob.limit(i, 0) + power_t[i] * (prob.limit(i, 1) - prob.limit(i, 0));
+        }
+
         InequalityConstraint(power_t, prev, prob);
         supply = PowerOutput(power_t, prob);
 
@@ -106,11 +111,13 @@ void DivisionCH::operator()(Individual& ind) const
 
             InequalityConstraint(power_t, prev, prob);
             supply = PowerOutput(power_t, prob);
+
+            i++;
         }
         
         for (int j = 0; j < prob.numMachines(); ++j)
         {
-            ind.encoding()[t * prob.numPeriods() + j] = power_t[j];
+            ind.encoding()[t * prob.numMachines() + j] = (power_t[j] - prob.limit(j, 0)) / prob.limit(j, 1);
         }
 
         prev = power_t;

@@ -45,15 +45,18 @@ int main()
     {
         BProblem* prob = nullptr;
         SetProblemType(&prob, probList[i]);
-        TestEvaluated(prob);
-        /*
+        //TestEvaluated(prob);
+        Individual::SetProblem(*prob);
+
         int RUN = 20;
         for (int r = 0; r < RUN; ++r)
         {
             Log log(probList[i], r);
             Population sol;
             ea->Solve(sol, *prob, log);
+
+            cout << "Run " << r << " finished." << endl;
         }
-        */
+        
     }
 }

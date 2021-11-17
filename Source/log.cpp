@@ -9,7 +9,7 @@ using namespace std;
 
 Log::Log(const string& name, const int run)
 {
-    string fname = "/Output/" + name + "/" + to_string(run);
+    string fname = "./Output/" + name + "/" + to_string(run);
     trend_.open(fname + "_trend.txt", ios::out);
     final_.open(fname + "_final.txt", ios::out);
 }

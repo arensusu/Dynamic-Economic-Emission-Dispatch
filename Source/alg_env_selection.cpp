@@ -38,5 +38,5 @@ size_t BasicEnvSelection::operator()(Population& children, Population& parents) 
         }
     }
     
-    return fronts[0].size();
+    return fronts[0].size() > children.size() ? children.size() : fronts[0].size();
 }
