@@ -12,6 +12,7 @@ public:
     explicit Log(const std::string&, const int);
     ~Log() { trend_.close(); final_.close(); }
 
+    void All(const Population&);
     void Trend(const Population&, const std::size_t);
     void Final(const Population&);
 

@@ -9,6 +9,7 @@
 
 #include <vector>
 #include "individual.h"
+#include "alg_sorting.h"
 
 using namespace std;
 
@@ -33,8 +34,29 @@ void TestEvaluated(const BProblem* prob)
     cout << ind.objs()[0] << " " << ind.objs()[1] << endl;
 }
 
+void TestDominated()
+{
+    Population pop;
+    pop.resize(10);
+
+    pop[0].objs() = vector<double>({ 4, 5 });
+    pop[1].objs() = vector<double>({ 3, 3 });
+    pop[2].objs() = vector<double>({ 2, 5 });
+    pop[3].objs() = vector<double>({ 5, 0 });
+    pop[4].objs() = vector<double>({ 6, 3 });
+    pop[5].objs() = vector<double>({ 1, 4 });
+    pop[6].objs() = vector<double>({ 2, 2 });
+    pop[7].objs() = vector<double>({ 0, 6 });
+    pop[8].objs() = vector<double>({ 3, 1 });
+    pop[9].objs() = vector<double>({ 4, 2 });
+
+    vector<vector<size_t>> front = NondominatedSort(pop);
+}
+
 int main()
 {
+    //TestDominated();
+    
     ifstream exp("exp.ini", ios::in);
     vector<string> probList;
     BaseEA* ea = nullptr;
@@ -48,7 +70,7 @@ int main()
         //TestEvaluated(prob);
         Individual::SetProblem(*prob);
 
-        int RUN = 20;
+        int RUN = 1;
         for (int r = 0; r < RUN; ++r)
         {
             Log log(probList[i], r);
@@ -59,4 +81,5 @@ int main()
         }
         
     }
+    
 }

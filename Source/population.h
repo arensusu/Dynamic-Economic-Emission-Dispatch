@@ -9,11 +9,17 @@ class Population
 {
 public:
     explicit Population(size_t s) : pop_(s) {}
+    Population(std::vector<Individual>::const_iterator start, std::vector<Individual>::const_iterator end) : pop_(start, end) {}
     Population() {}
     ~Population() {}
 
     const Individual& operator[] (const int i) const { return pop_[i]; }
     Individual& operator[] (const int i) { return pop_[i]; }
+
+    std::vector<Individual>::const_iterator begin() const { return pop_.begin(); }
+    std::vector<Individual>::const_iterator end() const { return pop_.end(); }
+    std::vector<Individual>::iterator begin() { return pop_.begin(); }
+    std::vector<Individual>::iterator end() { return pop_.end(); }
 
     const size_t size() const { return pop_.size(); }
 

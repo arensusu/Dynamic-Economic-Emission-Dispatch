@@ -76,6 +76,8 @@ void DE::Solve(Population& sol, const BProblem& prob, Log& log)
         size_t numPareto;
         numPareto = envSelection(pop[next], pop[curr]);
         //print objectives
+        //log.Trend(pop[next], numPareto);
+        log.All(pop[curr]);
         log.Trend(pop[next], numPareto);
 
         swap(pop[curr], pop[next]);
