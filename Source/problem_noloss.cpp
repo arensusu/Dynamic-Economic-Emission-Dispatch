@@ -85,7 +85,7 @@ bool NProblem::Evaluate(Individual& ind) const
     {
         for (j = 0; j < numMachines_; ++j)
         {
-            double power = encoding[i * numMachines_ + j];
+            double power = limits_[j][0] + encoding[i * numMachines_ + j] * (limits_[j][1] - limits_[j][0]);
             cost += coeff(j, 0)
                   + coeff(j, 1) * power
                   + coeff(j, 2) * pow(power, 2.0)

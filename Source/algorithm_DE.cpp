@@ -14,6 +14,8 @@
 
 #include "log.h"
 
+#include <algorithm>
+
 using namespace std;
 
 bool DE::Setup(ifstream& file)
@@ -51,7 +53,6 @@ void DE::Solve(Population& sol, const BProblem& prob, Log& log)
     }
     
     log.Final(pop[curr]);
-    log.Trend(pop[curr], 20);
 
     while (ffe < maxffe_)
     {
@@ -70,6 +71,7 @@ void DE::Solve(Population& sol, const BProblem& prob, Log& log)
             ch(pop[curr][Psize_ + i]);
 
             prob.Evaluate(pop[curr][Psize_ + i]);
+
             ffe++;
         }
         //selection

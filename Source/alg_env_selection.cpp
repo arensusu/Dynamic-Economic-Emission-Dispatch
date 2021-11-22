@@ -25,6 +25,7 @@ size_t BasicEnvSelection::operator()(Population& children, Population& parents) 
                 children[children.size() - remains] = parents[fronts[rank][i]];
                 remains--;
             }
+            rank++;
         }
         else
         {

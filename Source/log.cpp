@@ -1,5 +1,6 @@
 
 #include <algorithm>
+#include <filesystem>
 
 #include "log.h"
 #include "population.h"
@@ -15,15 +16,24 @@ bool firstComp(const Individual l, const Individual r)
 
 Log::Log(const string& name, const int run)
 {
-    string fname = "./Output/" + name + "/" + to_string(run);
-    trend_.open(fname + "_trend.txt", ios::out);
-    final_.open(fname + "_final.txt", ios::out);
+    string pname = "./Output/" + name;
+    if (!filesystem::exists(pname))
+    {
+        filesystem::create_directory(pname);
+    }
+
+    string fname =  pname + "/" + to_string(run);
+    trend_.open(fname + ".trend", ios::out);
+    final_.open(fname + ".final", ios::out);
 }
 
 void Log::All(const Population& pop)
 {
+    size_t half = pop.size() / 2;
     for (size_t i = 0; i < pop.size(); ++i)
     {
+        if (i == half) trend_ << endl;
+
         trend_ << "(";
         for (size_t j = 0; j < Individual::prob().numObjectives(); ++j)
         {

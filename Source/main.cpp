@@ -69,8 +69,8 @@ int main()
         SetProblemType(&prob, probList[i]);
         //TestEvaluated(prob);
         Individual::SetProblem(*prob);
-
-        int RUN = 1;
+        
+        int RUN = 20;
         for (int r = 0; r < RUN; ++r)
         {
             Log log(probList[i], r);

@@ -31,16 +31,16 @@ void InequalityConstraint(vector<double>& curr,
     {
         for (size_t i = 0; i < curr.size(); ++i)
         {
-            double upper = max(prob.limit(i, 0), prev[i] - prob.ramp(i, 0));
-            if (curr[i] < upper)
-            {
-                curr[i] = upper;
-            }
-
-            double lower = min(prob.limit(i, 1), prev[i] + prob.ramp(i, 1));
-            if (curr[i] > lower)
+            double lower = max(prob.limit(i, 0), prev[i] - prob.ramp(i, 0));
+            if (curr[i] < lower)
             {
                 curr[i] = lower;
+            }
+
+            double upper = min(prob.limit(i, 1), prev[i] + prob.ramp(i, 1));
+            if (curr[i] > upper)
+            {
+                curr[i] = upper;
             }
         }
     }
@@ -101,7 +101,7 @@ void DivisionCH::operator()(Individual& ind) const
 
         int i = 0;
         int MAXTRY = 100;
-        while (i < MAXTRY && supply != prob.load(t))
+        while (i < MAXTRY && abs(supply - prob.load(t)) > 0.00001)
         {
             double div = (prob.load(t) - supply) / prob.numMachines();
             for (int j = 0; j < prob.numMachines(); ++j)
@@ -117,7 +117,7 @@ void DivisionCH::operator()(Individual& ind) const
         
         for (int j = 0; j < prob.numMachines(); ++j)
         {
-            ind.encoding()[t * prob.numMachines() + j] = (power_t[j] - prob.limit(j, 0)) / prob.limit(j, 1);
+            ind.encoding()[t * prob.numMachines() + j] = (power_t[j] - prob.limit(j, 0)) / (prob.limit(j, 1) - prob.limit(j, 0));
         }
 
         prev = power_t;

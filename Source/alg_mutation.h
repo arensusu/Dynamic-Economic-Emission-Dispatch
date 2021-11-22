@@ -9,4 +9,11 @@ public:
     void operator()(Population&, const double, const int) const;
 };
 
+
+class BestOneMutation
+{
+public:
+    void operator() (Population&, const double, const int) const;
+};
+
 #endif
