@@ -84,7 +84,6 @@ void DE::Solve(Population& sol, const BProblem& prob, Log& log)
     }
 
     sol = pop[curr];
-    log.Final(sol);
     
     return;
 }

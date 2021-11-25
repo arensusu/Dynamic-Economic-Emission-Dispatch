@@ -6,6 +6,7 @@
 #include "algorithm_base.h"
 #include "log.h"
 #include "experiment.h"
+#include "indicator.h"
 
 #include <vector>
 #include "individual.h"
@@ -67,6 +68,7 @@ int main()
     {
         BProblem* prob = nullptr;
         SetProblemType(&prob, probList[i]);
+        IGD igd(probList[i]);
         
         //TestEvaluated(prob);
         
@@ -79,6 +81,7 @@ int main()
             Population sol;
             ea->Solve(sol, *prob, log);
 
+            log.Final(sol);
             cout << "Run " << r << " finished." << endl;
         }
         

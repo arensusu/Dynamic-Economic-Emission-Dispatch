@@ -4,6 +4,8 @@
 #include <fstream>
 #include <string>
 
+#include "indicator.h"
+
 class Population;
 
 class Log
@@ -17,6 +19,7 @@ public:
     void Final(const Population&);
 
 private:
+    IGD igd_;
     std::ofstream trend_;
     std::ofstream final_;
 

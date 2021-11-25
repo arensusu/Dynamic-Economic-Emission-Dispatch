@@ -5,6 +5,7 @@
 #include "log.h"
 #include "population.h"
 #include "individual.h"
+#include "indicator.h"
 
 using namespace std;
 
@@ -16,6 +17,8 @@ bool firstComp(const Individual l, const Individual r)
 
 Log::Log(const string& name, const int run)
 {
+    igd_ = IGD(name);
+
     string pname = "./Output/" + name;
     if (!filesystem::exists(pname))
     {
@@ -50,6 +53,8 @@ void Log::Trend(const Population& pop, const size_t numPareto)
 {
     Population paretoPop(pop.begin(), pop.begin() + numPareto);
     sort(paretoPop.begin(), paretoPop.end(), firstComp);
+
+    //trend_ << "IGD : " << igd_(paretoPop) << endl;
 
     for (size_t i = 0; i < numPareto; ++i)
     {
