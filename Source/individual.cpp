@@ -6,6 +6,22 @@ using namespace std;
 
 const BProblem* Individual::problem_ = 0;
 
+const vector<double> Individual::Decoder() const
+{
+    const BProblem& prob = Individual::prob();
+    vector<double> powers(prob.numVariables());
+
+    for (size_t i = 0; i < prob.numPeriods(); ++i)
+    {
+        for (size_t j = 0; j < prob.numMachines(); ++j)
+        {
+            powers[i * prob.numMachines() + j] = prob.limit(j, 0) + encoding_[i * prob.numMachines() + j] * (prob.limit(j, 1) - prob.limit(j, 0));
+        }
+    }
+
+    return powers;
+}
+
 ostream& operator<<(ostream& os, const Individual& ind)
 {
     vector<double> powers = ind.encoding();

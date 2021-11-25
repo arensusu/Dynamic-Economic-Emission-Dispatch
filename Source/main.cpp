@@ -15,10 +15,8 @@ using namespace std;
 
 void TestEvaluated(const BProblem* prob)
 {
-    Individual::SetProblem(*prob);
-    Individual ind;
-    vector<double>& enc = ind.encoding();
-    enc.resize(prob->numPeriods() * prob->numMachines());
+    vector<double> enc(prob->numVariables());
+
     ifstream file("test.txt", ios::in);
     for (size_t i = 0; i < prob->numPeriods(); ++i)
     {
@@ -29,9 +27,11 @@ void TestEvaluated(const BProblem* prob)
             enc[i * prob->numMachines() + j] = x;
         }
     }
-    prob->Evaluate(ind);
 
-    cout << ind.objs()[0] << " " << ind.objs()[1] << endl;
+    vector<double> objs;
+    prob->Evaluate(objs, enc);
+
+    cout << objs[0] << " " << objs[1] << endl;
 }
 
 void TestDominated()
@@ -67,7 +67,9 @@ int main()
     {
         BProblem* prob = nullptr;
         SetProblemType(&prob, probList[i]);
+        
         //TestEvaluated(prob);
+        
         Individual::SetProblem(*prob);
         
         int RUN = 20;

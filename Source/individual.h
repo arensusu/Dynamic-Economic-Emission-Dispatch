@@ -21,6 +21,8 @@ public:
     static void SetProblem(const BProblem& prob) { problem_ = &prob; }
     static const BProblem& prob() { return *problem_; }
     
+    const std::vector<double> Decoder() const;
+
     const double operator[](const int i) const { return encoding_[i]; }
     double& operator[](const int i) { return encoding_[i]; }
 

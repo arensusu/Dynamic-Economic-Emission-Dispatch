@@ -75,9 +75,8 @@ bool NProblem::Read(const string& fname)
     return true;
 }
 
-bool NProblem::Evaluate(Individual& ind) const
+bool NProblem::Evaluate(vector<double>& objs, const vector<double>& powers) const
 {
-    const vector<double> encoding = ind.encoding();
     double cost = 0, emission = 0;
 
     size_t i = -1, j = -1;
@@ -85,15 +84,14 @@ bool NProblem::Evaluate(Individual& ind) const
     {
         for (j = 0; j < numMachines_; ++j)
         {
-            double power = limits_[j][0] + encoding[i * numMachines_ + j] * (limits_[j][1] - limits_[j][0]);
             cost += coeff(j, 0)
-                  + coeff(j, 1) * power
-                  + coeff(j, 2) * pow(power, 2.0)
-                  + abs(coeff(j, 3) * sin(coeff(j, 4) * (limit(j, 0) - power)));
+                  + coeff(j, 1) * powers[i * numMachines_ + j]
+                  + coeff(j, 2) * pow(powers[i * numMachines_ + j], 2.0)
+                  + abs(coeff(j, 3) * sin(coeff(j, 4) * (limit(j, 0) - powers[i * numMachines_ + j])));
             emission += coeff(j, 5)
-                      + coeff(j, 6) * power
-                      + coeff(j, 7) * pow(power, 2.0)
-                      + coeff(j, 8) * exp(coeff(j, 9) * power);
+                      + coeff(j, 6) * powers[i * numMachines_ + j]
+                      + coeff(j, 7) * pow(powers[i * numMachines_ + j], 2.0)
+                      + coeff(j, 8) * exp(coeff(j, 9) * powers[i * numMachines_ + j]);
         }
     }
 
@@ -101,8 +99,13 @@ bool NProblem::Evaluate(Individual& ind) const
     {
         return false;
     }
-    ind.objs().push_back(cost);
-    ind.objs().push_back(emission);
+    objs.push_back(cost);
+    objs.push_back(emission);
 
     return true;
+}
+
+bool NProblem::Evaluate(Individual& ind) const
+{
+    return Evaluate(ind.objs(), ind.Decoder());
 }

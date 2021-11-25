@@ -10,7 +10,6 @@
 using namespace std;
 
 
-
 void RandOneMutation::operator()(Population& pop, const double F, const int pos) const
 {
     size_t Psize = pop.size() / 2;
@@ -19,11 +18,15 @@ void RandOneMutation::operator()(Population& pop, const double F, const int pos)
     {
         index[i] = i;
     }
-    shuffle(index.begin(), index.end(), default_random_engine(time(NULL)));
+
+    random_device rd;
+    shuffle(index.begin(), index.end(), default_random_engine(rd() * time(NULL)));
 
     int r1 = index[0];
     int r2 = index[1];
     int r3 = index[2];
+    
+    //cout << r1 << " " << r2 << " " << r3 << endl;
 
     vector<double>& mutant = pop[Psize + pos].encoding();
     mutant.resize(Individual::prob().numVariables());

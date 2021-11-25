@@ -51,8 +51,6 @@ void DE::Solve(Population& sol, const BProblem& prob, Log& log)
         prob.Evaluate(pop[curr][i]);
         ffe++;
     }
-    
-    log.Final(pop[curr]);
 
     while (ffe < maxffe_)
     {

@@ -2,6 +2,7 @@
 #define PROB_BASE__
 
 #include <string>
+#include <vector>
 
 class Individual;
 
@@ -30,6 +31,7 @@ public:
 
     virtual bool Read(const std::string&) = 0;
     virtual bool Evaluate(Individual&) const = 0;
+    virtual bool Evaluate(std::vector<double>&, const std::vector<double>&) const = 0;
 
 protected:
     std::string name_;

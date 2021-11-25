@@ -120,6 +120,6 @@ void CrowdingDistanceSort(vector<size_t> &front, const Population &pop)
 
     for (size_t i = 0; i < objIndex.size(); ++i)
     {
-        front[i] = size_t(objIndex[i][1]);
+        front[i] = size_t(objIndex[objIndex.size() - 1 - i][1]);
     }
 }

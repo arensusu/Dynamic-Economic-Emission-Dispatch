@@ -28,7 +28,9 @@ public:
     virtual size_t numObjectives() const { return numObjectives_; }
 
     virtual bool Read(const std::string&);
+
     virtual bool Evaluate(Individual&) const;
+    virtual bool Evaluate(std::vector<double>&, const std::vector<double>&) const;
     
 protected:
     std::vector<std::vector<double>> limits_;
