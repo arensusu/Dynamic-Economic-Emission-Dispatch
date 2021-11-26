@@ -1,0 +1,14 @@
+numMachines
+
+Pmin Pmax UR DR a b c d e a b r n o
+.
+.
+.
+.
+.
+
+numPeriods
+
+D1 D2 D3 ...
+
+numObjectives

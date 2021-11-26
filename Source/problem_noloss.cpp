@@ -20,12 +20,12 @@ bool NProblem::SetCoeff(ifstream& file)
     {
         file >> limits_[i][0] >> limits_[i][1];
 
+        file >> ramps_[i][0] >> ramps_[i][1];
+
         for (j = 0; j < numCoeff; ++j)
         {
             file >> coeffs_[i][j];
         }
-
-        file >> ramps_[i][0] >> ramps_[i][1];
     }
 
     if (i < numMachines_ || j < numCoeff)

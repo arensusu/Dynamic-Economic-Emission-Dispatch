@@ -31,13 +31,13 @@ void InequalityConstraint(vector<double>& curr,
     {
         for (size_t i = 0; i < curr.size(); ++i)
         {
-            double lower = max(prob.limit(i, 0), prev[i] - prob.ramp(i, 0));
+            double lower = max(prob.limit(i, 0), prev[i] - prob.ramp(i, 1));
             if (curr[i] < lower)
             {
                 curr[i] = lower;
             }
 
-            double upper = min(prob.limit(i, 1), prev[i] + prob.ramp(i, 1));
+            double upper = min(prob.limit(i, 1), prev[i] + prob.ramp(i, 0));
             if (curr[i] > upper)
             {
                 curr[i] = upper;
