@@ -74,17 +74,21 @@ int main()
         
         Individual::SetProblem(*prob);
         
+        Population avg;
+        Log log(probList[i]);
+
         int RUN = 20;
         for (int r = 0; r < RUN; ++r)
         {
-            Log log(probList[i], r);
+            log(r);
             Population sol;
             ea->Solve(sol, *prob, log);
 
-            log.Final(sol);
+            avg.push_back(sol);
             cout << "Run " << r << " finished." << endl;
         }
         
+        log.FinalFront(avg);
     }
     
 }

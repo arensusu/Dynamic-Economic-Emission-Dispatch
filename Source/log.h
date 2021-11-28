@@ -11,18 +11,19 @@ class Population;
 class Log
 {
 public:
-    explicit Log(const std::string&, const int);
-    ~Log() { trend_.close(); final_.close(); }
+    explicit Log(const std::string&);
+    ~Log() { trend_.close(); }
 
     void All(const Population&);
     void Trend(const Population&, const std::size_t);
-    void Final(const Population&);
+    void FinalFront(const Population&);
+
+    void operator()(const int);
 
 private:
     IGD igd_;
+    std::string pname_;
     std::ofstream trend_;
-    std::ofstream final_;
-
 };
 
 #endif

@@ -6,6 +6,7 @@
 #include "population.h"
 #include "individual.h"
 #include "indicator.h"
+#include "alg_sorting.h"
 
 using namespace std;
 
@@ -15,19 +16,21 @@ bool firstComp(const Individual l, const Individual r)
     else return false;
 }
 
-Log::Log(const string& name, const int run)
+Log::Log(const string& name)
 {
     igd_ = IGD(name);
 
-    string pname = "./Output/" + name;
-    if (!filesystem::exists(pname))
+    pname_ = "./Output/" + name;
+    if (!filesystem::exists(pname_))
     {
-        filesystem::create_directory(pname);
+        filesystem::create_directory(pname_);
     }
+}
 
-    string fname =  pname + "/" + to_string(run);
-    trend_.open(fname + ".trend", ios::out);
-    final_.open(fname + ".final", ios::out);
+void Log::operator()(const int i)
+{
+    trend_.close();
+    trend_.open(pname_ + "/" + to_string(i) + ".trend", ios::out);
 }
 
 void Log::All(const Population& pop)
@@ -54,8 +57,6 @@ void Log::Trend(const Population& pop, const size_t numPareto)
     Population paretoPop(pop.begin(), pop.begin() + numPareto);
     sort(paretoPop.begin(), paretoPop.end(), firstComp);
 
-    //trend_ << "IGD : " << igd_(paretoPop) << endl;
-
     for (size_t i = 0; i < numPareto; ++i)
     {
         trend_ << "(";
@@ -70,12 +71,20 @@ void Log::Trend(const Population& pop, const size_t numPareto)
     return;
 }
 
-void Log::Final(const Population& pop)
+void Log::FinalFront(const Population& pop)
 {
-    for (size_t i = 0; i < pop.size(); ++i)
+    ofstream all(pname_ + "/all.avg", ios::out);
+
+    vector<size_t> fronts = NondominatedSort(pop)[0];
+
+    for (size_t i = 0; i < fronts.size(); ++i)
     {
-        final_ << pop[i] << endl;
+        all << pop[fronts[i]] << endl;
     }
 
+    //trend_ << "IGD : " << igd_(paretoPop) << endl;
+
+
+    all.close();
     return;
 }
