@@ -77,13 +77,31 @@ void Log::FinalFront(const Population& pop)
 
     vector<size_t> fronts = NondominatedSort(pop)[0];
 
+    Population paretoSet;
     for (size_t i = 0; i < fronts.size(); ++i)
     {
-        all << pop[fronts[i]] << endl;
+        paretoSet.push_back(pop[fronts[i]]);
+    }
+
+    sort(paretoSet.begin(), paretoSet.end(), firstComp);
+
+    for (size_t i = 0; i < paretoSet.size(); ++i)
+    {
+        all << "(";
+        for (size_t j = 0; j < Individual::prob().numObjectives(); ++j)
+        {
+            all << paretoSet[i].objs()[j] << " ";
+        }
+        all << "), ";
+    }
+    all << "\n\n";
+
+    for (size_t i = 0; i < paretoSet.size(); ++i)
+    {
+        all << paretoSet[i] << endl;
     }
 
     //trend_ << "IGD : " << igd_(paretoPop) << endl;
-
 
     all.close();
     return;

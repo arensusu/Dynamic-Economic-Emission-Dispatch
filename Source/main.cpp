@@ -89,6 +89,7 @@ int main()
         }
         
         log.FinalFront(avg);
+        cout << "Problem " << probList[i] << " finished." << endl;
     }
     
 }

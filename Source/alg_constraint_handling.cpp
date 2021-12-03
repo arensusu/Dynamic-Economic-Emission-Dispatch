@@ -1,6 +1,8 @@
 
 #include <limits>
 #include <algorithm>
+#include <ctime>
+#include <cstdlib>
 
 #include "alg_constraint_handling.h"
 #include "individual.h"
@@ -115,6 +117,51 @@ void DivisionCH::operator()(Individual& ind) const
             i++;
         }
         
+        for (int j = 0; j < prob.numMachines(); ++j)
+        {
+            ind.encoding()[t * prob.numMachines() + j] = (power_t[j] - prob.limit(j, 0)) / (prob.limit(j, 1) - prob.limit(j, 0));
+        }
+
+        prev = power_t;
+    }
+
+    return;
+}
+
+void FineTuningCH::operator()(Individual& ind) const
+{
+    srand(time(NULL));
+
+    const BProblem& prob = Individual::prob();
+    double supply;
+
+    vector<double> prev;
+    for (int t = 0; t < prob.numPeriods(); ++t)
+    {
+        vector<double> power_t(ind.encoding().begin() + t * prob.numMachines(), ind.encoding().begin() + (t + 1) * prob.numMachines());
+
+        for (size_t i = 0; i < power_t.size(); ++i)
+        {
+            power_t[i] = prob.limit(i, 0) + power_t[i] * (prob.limit(i, 1) - prob.limit(i, 0));
+        }
+
+        InequalityConstraint(power_t, prev, prob);
+        supply = PowerOutput(power_t, prob);
+
+        int i = 0;
+        int MAXTRY = 100;
+        while (i < MAXTRY && abs(supply - prob.load(t)) > 0.00001)
+        {
+            size_t j = rand() / prob.numMachines();
+            
+            power_t[j] += prob.load(t) - supply;
+
+            InequalityConstraint(power_t, prev, prob);
+            supply = PowerOutput(power_t, prob);
+
+            i++;
+        }
+
         for (int j = 0; j < prob.numMachines(); ++j)
         {
             ind.encoding()[t * prob.numMachines() + j] = (power_t[j] - prob.limit(j, 0)) / (prob.limit(j, 1) - prob.limit(j, 0));

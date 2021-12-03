@@ -9,7 +9,7 @@
 using namespace std;
 
 IGD::IGD(const string& name)
-{
+{/*
     string fname = "./Indicator/IGD/" + name;
     ifstream file(fname, ios::in);
 
@@ -22,7 +22,7 @@ IGD::IGD(const string& name)
         file >> obj1 >> obj2;
         refs_.push_back({ obj1, obj2 });
     }
-
+*/
 }
 
 double IGD::operator()(const Population& pop) const

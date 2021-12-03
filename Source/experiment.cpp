@@ -24,11 +24,8 @@ void SetExperiment(BaseEA** ea, vector<string>& probList, ifstream& file)
 
     (*ea)->Setup(file);
 
-    string prob;
-
-    file >> dummy >> dummy;
-    
-    while (file >> prob)
+    string prob;    
+    while (file >> dummy >> dummy >> prob)
     {
         probList.push_back(prob);
     }
