@@ -152,7 +152,7 @@ void FineTuningCH::operator()(Individual& ind) const
         int MAXTRY = 100;
         while (i < MAXTRY && abs(supply - prob.load(t)) > 0.00001)
         {
-            size_t j = rand() / prob.numMachines();
+            size_t j = rand() % prob.numMachines();
             
             power_t[j] += prob.load(t) - supply;
 

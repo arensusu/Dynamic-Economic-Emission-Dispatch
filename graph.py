@@ -2,9 +2,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 
-pname = './Output/5_24_FIG'
+INDEX = 2
 
-data = open('./Output/5_24_WOB/0.trend', 'r')
+x = [[40000, 60000], [2500000, 2800000], [650000, 750000]]
+y = [[15000, 30000], [300000, 350000], [300000, 500000]]
+
+pname = './Output/15_24_FIG'
+
+data = open('./Output//0.5_0.5_div/15_24_WOB/0.trend', 'r')
+
+xAxis = x[INDEX]
+yAxis = y[INDEX]
 
 if not os.path.exists(pname) :
   os.mkdir(pname)
@@ -23,8 +31,8 @@ for line in data.readlines() :
     emissions += [float(lis[1])]
 
   plt.scatter(np.array(costs), np.array(emissions), marker = '.')
-  plt.xlim(0, 100000)
-  plt.ylim(0, 100000)
+  plt.xlim(xAxis[0], xAxis[1])
+  plt.ylim(yAxis[0], yAxis[1])
   plt.xlabel('Cost')
   plt.ylabel('Emission')
 

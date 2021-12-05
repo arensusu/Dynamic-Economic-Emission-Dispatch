@@ -19,4 +19,11 @@ private:
 
 };
 
+class Compromise
+{
+public:
+    std::size_t operator()(const Population&) const;
+
+};
+
 #endif

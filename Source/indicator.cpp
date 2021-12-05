@@ -2,6 +2,7 @@
 #include <fstream>
 #include <limits>
 #include <cmath>
+#include <algorithm>
 
 #include "indicator.h"
 #include "population.h"
@@ -48,4 +49,69 @@ double IGD::operator()(const Population& pop) const
     }
 
     return igd / pop.size();
+}
+
+size_t Compromise::operator()(const Population& pop) const
+{
+    vector<double> fmin(2);
+    vector<double> fmax(2);
+
+    for (size_t i = 0; i < Individual::prob().numObjectives(); ++i)
+    {
+        double min = pop[0].objs()[i];
+        double max = min;
+        double cur;
+
+        for (size_t j = 1; j < pop.size(); ++j)
+        {
+            cur = pop[j].objs()[i];
+
+            if (cur > max)
+            {
+                max = cur;
+            }
+
+            if (cur < min)
+            {
+                min = cur;
+            }
+        }
+
+        fmin[i] = min;
+        fmax[i] = max;
+    }
+
+    vector<double> degree(pop.size(), 0);
+    double degreeSum = 0;
+
+    for (size_t i = 0; i < pop.size(); ++i)
+    {
+        double cur;
+        for (size_t j = 0; j < Individual::prob().numObjectives(); ++j)
+        {
+            cur = pop[i].objs()[j];
+
+            if (cur <= fmin[j])
+            {
+                degree[i] += 1;
+            }
+            else if (cur >= fmax[j])
+            {
+                degree[i] += 0;
+            }
+            else
+            {
+                degree[i] += ((fmax[j] - cur) / (fmax[j] - fmin[j]));
+            }
+        }
+
+        degreeSum += degree[i];
+    }
+
+    for (size_t i = 0; i < pop.size(); ++i)
+    {
+        degree[i] = degree[i] / degreeSum;
+    }
+
+    return max_element(degree.begin(), degree.end()) - degree.begin();
 }

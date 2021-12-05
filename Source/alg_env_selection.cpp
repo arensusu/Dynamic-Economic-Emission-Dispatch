@@ -9,7 +9,7 @@
 
 using namespace std;
 
-size_t BasicEnvSelection::operator()(Population& children, Population& parents) const
+size_t BasicEnvSelection::operator()(Population& children, const Population& parents) const
 {
     vector<vector<size_t>> fronts = NondominatedSort(parents);
 

@@ -7,6 +7,9 @@
 #include "individual.h"
 #include "indicator.h"
 #include "alg_sorting.h"
+#include "alg_env_selection.h"
+
+#define FINAL_SIZE 20
 
 using namespace std;
 
@@ -73,19 +76,16 @@ void Log::Trend(const Population& pop, const size_t numPareto)
 
 void Log::FinalFront(const Population& pop)
 {
+    BasicEnvSelection env;
     ofstream all(pname_ + "/all.avg", ios::out);
 
-    vector<size_t> fronts = NondominatedSort(pop)[0];
+    Population paretoSet(FINAL_SIZE);
 
-    Population paretoSet;
-    for (size_t i = 0; i < fronts.size(); ++i)
-    {
-        paretoSet.push_back(pop[fronts[i]]);
-    }
+    size_t frontSize = env(paretoSet, pop);
 
-    sort(paretoSet.begin(), paretoSet.end(), firstComp);
+    sort(paretoSet.begin(), paretoSet.begin() + frontSize, firstComp);
 
-    for (size_t i = 0; i < paretoSet.size(); ++i)
+    for (size_t i = 0; i < frontSize; ++i)
     {
         all << "(";
         for (size_t j = 0; j < Individual::prob().numObjectives(); ++j)
@@ -95,6 +95,13 @@ void Log::FinalFront(const Population& pop)
         all << "), ";
     }
     all << "\n\n";
+
+    Compromise comp;
+    size_t index = comp(paretoSet);
+
+    all << "Best Cost : " << paretoSet[0].objs()[0] << ", " << paretoSet[0].objs()[1] << endl;
+    all << "Compromise : " << paretoSet[index].objs()[0] << ", " << paretoSet[index].objs()[1] << endl;
+    all << "Best Emission : " << paretoSet[paretoSet.size() - 1].objs()[0] << ", " << paretoSet[paretoSet.size() - 1].objs()[1] << endl << endl;
 
     for (size_t i = 0; i < paretoSet.size(); ++i)
     {

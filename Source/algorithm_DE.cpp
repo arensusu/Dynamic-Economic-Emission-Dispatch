@@ -33,6 +33,7 @@ bool DE::Setup(ifstream& file)
 void DE::Solve(Population& sol, const BProblem& prob, Log& log)
 {
     DivisionCH ch;
+    //FineTuningCH ch;
     RandomInitialization initialization;
     RandOneMutation mutation;
     BinaryCrossover crossover;
