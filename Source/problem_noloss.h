@@ -13,13 +13,13 @@ public:
     explicit NProblem(const std::string name = "NoLoss") : BProblem(name), numMachines_(0), numPeriods_(0), numObjectives_(0) {}
     virtual ~NProblem() {}
 
-    virtual const double limit(const int machine, const int i) const { return limits_[machine][i]; }
-    virtual const double coeff(const int machine, const int coeffIndex) const { return coeffs_[machine][coeffIndex]; }
-    virtual const double ramp(const int machine, const int i) const { return ramps_[machine][i]; }
-    virtual const double load(const int period) const { return loads_[period]; }
+    virtual const double limit(const std::size_t machine, const std::size_t i) const { return limits_[machine][i]; }
+    virtual const double coeff(const std::size_t machine, const std::size_t coeffIndex) const { return coeffs_[machine][coeffIndex]; }
+    virtual const double ramp(const std::size_t machine, const std::size_t i) const { return ramps_[machine][i]; }
+    virtual const double load(const std::size_t period) const { return loads_[period]; }
 
-    virtual const double B2(const int i, const int j) const { return std::numeric_limits<double>::min(); }
-    virtual const double B1(const int i) const { return std::numeric_limits<double>::min(); }
+    virtual const double B2(const std::size_t i, const std::size_t j) const { return std::numeric_limits<double>::min(); }
+    virtual const double B1(const std::size_t i) const { return std::numeric_limits<double>::min(); }
     virtual const double B0() const { return std::numeric_limits<double>::min(); }
 
     virtual size_t numPeriods() const { return numPeriods_; }

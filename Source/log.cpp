@@ -38,11 +38,8 @@ void Log::operator()(const int i)
 
 void Log::All(const Population& pop)
 {
-    size_t half = pop.size() / 2;
     for (size_t i = 0; i < pop.size(); ++i)
     {
-        if (i == half) trend_ << endl;
-
         trend_ << "(";
         for (size_t j = 0; j < Individual::prob().numObjectives(); ++j)
         {
@@ -57,10 +54,18 @@ void Log::All(const Population& pop)
 
 void Log::Trend(const Population& pop, const size_t numPareto)
 {
-    Population paretoPop(pop.begin(), pop.begin() + numPareto);
+    Population paretoPop;
+    for (size_t i = 0; i < numPareto; ++i)
+    {
+        //if (pop[i].Check())
+        {
+            paretoPop.push_back(pop[i]);
+        }
+    }
+
     sort(paretoPop.begin(), paretoPop.end(), firstComp);
 
-    for (size_t i = 0; i < numPareto; ++i)
+    for (size_t i = 0; i < paretoPop.size(); ++i)
     {
         trend_ << "(";
         for (size_t j = 0; j < Individual::prob().numObjectives(); ++j)
@@ -71,17 +76,55 @@ void Log::Trend(const Population& pop, const size_t numPareto)
     }
     trend_ << endl;
 
+    trend_ << "IGD : " << igd_(paretoPop) << endl;
+
     return;
 }
 
 void Log::FinalFront(const Population& pop)
 {
-    BasicEnvSelection env;
     ofstream all(pname_ + "/all.avg", ios::out);
 
+    //igd
+    sort(igdVals_.begin(), igdVals_.end());
+
+    double avgIgd = 0;
+    for (size_t i = 0; i < igdVals_.size(); ++i)
+    {
+        avgIgd += igdVals_[i];
+    }
+    avgIgd = avgIgd / igdVals_.size();
+
+    all << "Min_IGD : " << igdVals_[0] << endl;
+    all << "Mean_IGD : " << (igdVals_[igdVals_.size() / 2] + igdVals_[igdVals_.size() / 2 + 1]) / 2 << endl;
+    all << "Max_IGD : " << igdVals_[igdVals_.size() - 1] << endl;
+    all << "Avg_IGD : " << avgIgd << endl;
+
+    //front
+    Population feasiblePop;
+    for (size_t i = 0; i < pop.size(); ++i)
+    {
+        if (pop[i].Check())
+        {
+            feasiblePop.push_back(pop[i]);
+        }
+    }
+
+    size_t frontSize;
     Population paretoSet(FINAL_SIZE);
 
-    size_t frontSize = env(paretoSet, pop);
+    BasicEnvSelection env;
+
+    if (feasiblePop.size() == 0)
+    {
+        frontSize = env(paretoSet, pop);
+    }
+    else
+    {
+        frontSize = env(paretoSet, feasiblePop);
+    }
+    
+    paretoSet.resize(frontSize);
 
     sort(paretoSet.begin(), paretoSet.begin() + frontSize, firstComp);
 
@@ -107,8 +150,6 @@ void Log::FinalFront(const Population& pop)
     {
         all << paretoSet[i] << endl;
     }
-
-    //trend_ << "IGD : " << igd_(paretoPop) << endl;
 
     all.close();
     return;

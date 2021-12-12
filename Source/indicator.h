@@ -12,10 +12,13 @@ public:
     explicit IGD(const std::string&);
     IGD() {}
 
-    double operator()(const Population&) const;
+    double operator()(const Population&);
+
+    double val() const { return val_; }
 
 private:
     std::vector<std::vector<double>> refs_;
+    double val_ = 0;
 
 };
 

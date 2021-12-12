@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <cstdlib>
 
 #include "problem_base.h"
 #include "population.h"
@@ -91,5 +92,7 @@ int main()
         log.FinalFront(avg);
         cout << "Problem " << probList[i] << " finished." << endl;
     }
+
+    system("python graph.py");
     
 }

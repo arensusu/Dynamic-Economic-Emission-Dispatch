@@ -9,8 +9,8 @@ public:
     explicit WBProblem(const std::string& name = "WithB0") : WOBProblem(name), B0_(-1) {}
     virtual ~WBProblem() {}
 
-    virtual const double B2(const int i, const int j) const { return B2_[i][j]; }
-    virtual const double B1(const int i) const { return B1_[i]; }
+    virtual const double B2(const std::size_t i, const std::size_t j) const { return B2_[i][j]; }
+    virtual const double B1(const std::size_t i) const { return B1_[i]; }
     virtual const double B0() const { return B0_; }
 
     virtual bool Read(const std::string&);

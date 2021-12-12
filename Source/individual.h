@@ -20,11 +20,20 @@ public:
 
     static void SetProblem(const BProblem& prob) { problem_ = &prob; }
     static const BProblem& prob() { return *problem_; }
-    
-    const std::vector<double> Decoder() const;
+
+    void Encoder(const std::size_t, const std::vector<double>&);
+    void Encoder(const std::vector<double>&);
+
+    std::vector<double> Decoder(const std::size_t) const;
+    std::vector<double> Decoder() const;
 
     const double operator[](const int i) const { return encoding_[i]; }
     double& operator[](const int i) { return encoding_[i]; }
+
+    const double PowerOutput(const std::size_t) const;
+    const std::vector<double> PowerOutput() const;
+
+    bool Check() const;
 
 private:
     std::vector<double> encoding_;

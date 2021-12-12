@@ -16,7 +16,7 @@ size_t BasicEnvSelection::operator()(Population& children, const Population& par
     size_t remains = children.size();
     size_t rank = 0;
     
-    while (remains > 0)
+    while (remains > 0 && rank < fronts.size())
     {
         if (remains > fronts[rank].size())
         {

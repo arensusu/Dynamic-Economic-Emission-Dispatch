@@ -35,7 +35,9 @@ void DE::Solve(Population& sol, const BProblem& prob, Log& log)
     DivisionCH ch;
     //FineTuningCH ch;
     RandomInitialization initialization;
-    RandOneMutation mutation;
+    //BestOneMutation mutation;
+    //RandOneMutation mutation;
+    PolynToCurMutation mutation;
     BinaryCrossover crossover;
     BasicEnvSelection envSelection;
 
@@ -55,6 +57,8 @@ void DE::Solve(Population& sol, const BProblem& prob, Log& log)
 
     while (ffe < maxffe_)
     {
+        log.All(pop[curr]);
+
         pop[next].clear();
         pop[next].resize(Psize_);
 
@@ -76,15 +80,15 @@ void DE::Solve(Population& sol, const BProblem& prob, Log& log)
         //selection
         size_t numPareto;
         numPareto = envSelection(pop[next], pop[curr]);
+
         //print objectives
-        //log.Trend(pop[next], numPareto);
-        log.All(pop[curr]);
         log.Trend(pop[next], numPareto);
 
         swap(pop[curr], pop[next]);
     }
 
     sol = pop[curr];
+    log.RecordIGD();
     
     return;
 }

@@ -9,7 +9,7 @@ public:
     explicit WOBProblem(const std::string &name = "WithoutB0") : NProblem(name) {}
     virtual ~WOBProblem() {}
 
-    virtual const double B2(const int i, const int j) const { return B2_[i][j]; }
+    virtual const double B2(const std::size_t i, const std::size_t j) const { return B2_[i][j]; }
 
     virtual bool Read(const std::string&);
 

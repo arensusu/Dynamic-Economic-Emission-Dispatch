@@ -10,8 +10,8 @@
 using namespace std;
 
 IGD::IGD(const string& name)
-{/*
-    string fname = "./Indicator/IGD/" + name;
+{
+    string fname = "./Indicator/IGD/" + name + ".igd";
     ifstream file(fname, ios::in);
 
     size_t num;
@@ -23,21 +23,31 @@ IGD::IGD(const string& name)
         file >> obj1 >> obj2;
         refs_.push_back({ obj1, obj2 });
     }
-*/
 }
 
-double IGD::operator()(const Population& pop) const
+double IGD::operator()(const Population& pop)
 {
     double igd = 0;
+
+    if (pop.size() == 0)
+    {
+        return 1;
+    }
+
+    double Cmin = refs_[0][0];
+    double Cmax = refs_[refs_.size() - 1][0];
+    double Emin = refs_[refs_.size() - 1][1];
+    double Emax = refs_[0][1];
+
     for (size_t i = 0; i < refs_.size(); ++i)
     {        
         double min = numeric_limits<double>::max();
         for (size_t j = 0; j < pop.size(); ++j)
         {
-            double obj1 = pop[j].objs()[0];
-            double obj2 = pop[j].objs()[1];
+            double Cdiff = (pop[j].objs()[0] - refs_[i][0]) / (Cmax - Cmin);
+            double Ediff = (pop[j].objs()[1] - refs_[i][1]) / (Emax - Emin);
             
-            double dis = pow(pow(obj1 - refs_[i][0], 2) + pow(obj2 - refs_[i][1], 2), 0.5);
+            double dis = sqrt(pow(Cdiff, 2) + pow(Cdiff, 2));
 
             if (dis < min)
             {
@@ -48,7 +58,9 @@ double IGD::operator()(const Population& pop) const
         igd += min;
     }
 
-    return igd / pop.size();
+    val_ = igd / pop.size();
+
+    return val_;
 }
 
 size_t Compromise::operator()(const Population& pop) const
