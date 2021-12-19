@@ -4,67 +4,98 @@
 
 using namespace std;
 
+// Initialize the problem of individuals.
 const BProblem* Individual::problem_ = 0;
 
+// Encode the specific period.
 void Individual::Encoder(const size_t t, const vector<double>& powers)
 {
-    for (size_t i = 0; i < problem_->numMachines(); ++i)
+    // Parameters.
+    size_t numMachines = problem_->numMachines();
+
+    // Normalize.
+    for (size_t i = 0; i < numMachines; ++i)
     {
-        encoding_[t * problem_->numMachines() + i] = (powers[i] - problem_->limit(i, 0)) / (problem_->limit(i, 1) - problem_->limit(i, 0));
+        const double Pmin = problem_->limit(i, 0);
+        const double Pmax = problem_->limit(i, 1);
+
+        encoding_[t * numMachines + i] = (powers[i] - Pmin) / (Pmax - Pmin);
     }
 }
 
+// Encode all periods.
 void Individual::Encoder(const vector<double>& powers)
 {
-    for (size_t t = 0; t < problem_->numPeriods(); ++t)
+    // Parameters.
+    size_t numPeriods = problem_->numPeriods();
+    size_t numMachines = problem_->numMachines();
+
+    // Normalize.
+    for (size_t t = 0; t < numPeriods; ++t)
     {
-        Encoder(t, vector<double>(powers.begin() + t * problem_->numMachines(), powers.begin() + (t + 1) * problem_->numMachines()));
+        vector<double> period(powers.begin() + t * numMachines, powers.begin() + (t + 1) * numMachines);
+
+        Encoder(t, period);
     }
 }
 
+// Decode the specific period.
 vector<double> Individual::Decoder(const size_t t) const
 {
-    const BProblem& prob = Individual::prob();
-    vector<double> powers(prob.numMachines());
+    // Parameters.
+    size_t numMachines = problem_->numMachines();
 
-    for (size_t j = 0; j < prob.numMachines(); ++j)
+    // Denormalize.
+    vector<double> powers(numMachines);
+    for (size_t i = 0; i < numMachines; ++i)
     {
-        powers[j] = prob.limit(j, 0) + encoding_[t * prob.numMachines() + j] * (prob.limit(j, 1) - prob.limit(j, 0));
+        const double Pmin = problem_->limit(i, 0);
+        const double Pmax = problem_->limit(i, 1);
+
+        powers[i] = Pmin + encoding_[t * numMachines + i] * (Pmax - Pmin);
     }
 
     return powers;
 }
 
+// Decode all periods.
 vector<double> Individual::Decoder() const
 {
-    const BProblem& prob = Individual::prob();
-    vector<double> powers(prob.numVariables());
+    // Parameters.
+    size_t numPeriods = problem_->numPeriods();
+    size_t numMachines = problem_->numMachines();
+    size_t numVariables = numPeriods * numMachines;
 
-    for (size_t t = 0; t < prob.numPeriods(); ++t)
+    // Denormalize.
+    vector<double> powers(numVariables);
+    for (size_t t = 0; t < numPeriods; ++t)
     {
         vector<double> power_t = Decoder(t);
-        for (size_t i = 0; i < prob.numMachines(); ++i)
+        for (size_t i = 0; i < numMachines; ++i)
         {
-            powers[t * prob.numMachines() + i] = power_t[i];
+            powers[t * numMachines + i] = power_t[i];
         }
     }
 
     return powers;
 }
 
-const double Individual::PowerOutput(const size_t t) const
+// Get the output of the specific vector.
+const double Individual::PowerOutput(const std::vector<double>& powers)
 {
-    const vector<double> powers = Decoder(t);
-
-    double provide = 0;
+    // Calculate the supply.
+    double supply = 0;
     for (size_t i = 0; i < powers.size(); ++i)
     {
-        provide += powers[i];
+        supply += powers[i];
     }
 
+    double loss = 0;
+
+    // Calculate the transmission loss.
     if (problem_->B2(0, 0) != numeric_limits<double>::min())
     {
-        double loss = 0;
+        // Quadratic term.
         for (size_t i = 0; i < powers.size(); ++i)
         {
             for (size_t j = 0; j < powers.size(); ++j)
@@ -72,59 +103,91 @@ const double Individual::PowerOutput(const size_t t) const
                 loss += powers[i] * problem_->B2(i, j) * powers[j];
             }
         }
+    }
 
-        if (problem_->B0() != numeric_limits<double>::min())
+    if (problem_->B0() != numeric_limits<double>::min())
+    {
+        // Linear term.
+        for (size_t i = 0; i < powers.size(); ++i)
         {
-            for (size_t i = 0; i < powers.size(); ++i)
-            {
-                loss += powers[i] * problem_->B1(i);
-            }
+            loss += powers[i] * problem_->B1(i);
         }
 
-        provide -= loss;
+        // Constant.
+        loss += problem_->B0();
     }
 
-    return provide;
+    supply -= loss;
+
+    return supply;
 }
 
+// Get the output of the specific period.
+const double Individual::PowerOutput(const size_t t) const
+{
+    const vector<double> powers = Decoder(t);
+
+    return PowerOutput(powers);
+}
+
+// Get the output of all periods.
 const vector<double> Individual::PowerOutput() const
 {
-    vector<double> provides(problem_->numPeriods());
+    // Parameters.
+    size_t numPeriods = problem_->numPeriods();
 
-    for (size_t t = 0; t < problem_->numPeriods(); ++t)
+    // Calculate the supplies.
+    vector<double> supplies(numPeriods);
+    for (size_t t = 0; t < numPeriods; ++t)
     {
-        provides[t] = PowerOutput(t);
+        supplies[t] = PowerOutput(t);
     }
 
-    return provides;
+    return supplies;
 }
 
-bool Individual::Check() const
+// Check with the threshold.
+bool Individual::Check(const double threshold = 0.00001) const
 {
+    // Parameters.
+    size_t numPeriods = problem_->numPeriods();
+
     bool isFeasible = true;
 
-    for (size_t t = 0; t < problem_->numPeriods(); ++t)
+    // Calculate the gap.
+    for (size_t t = 0; t < numPeriods; ++t)
     {
-        if (abs(PowerOutput(t) - problem_->load(t)) > 0.00001)
+        const double supply = PowerOutput(t);
+        const double demand = problem_->load(t);
+
+        if (abs(supply - demand) > threshold)
         {
             isFeasible = false;
+            break;
         }
     }
 
     return isFeasible;
 }
 
+// Print.
 ostream& operator<<(ostream& os, const Individual& ind)
 {
     os << "Objectives: " << ind.objs()[0] << ", " << ind.objs()[1] << endl;
 
-    os << "Feasible: " << ind.Check() << endl;
+    os << "Feasible: " << ind.Check();
 
     vector<double> powers = ind.Decoder();
 
+    size_t numMachines = Individual::prob().numMachines();
     for (size_t i = 0; i < powers.size(); ++i)
     {
-        os << ", " << powers[i];
+        if (i % numMachines == 0)
+        {
+            os << endl;
+        }
+
+        os << " " << powers[i];
     }
     os << endl;
 

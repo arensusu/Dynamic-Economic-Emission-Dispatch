@@ -1,8 +1,8 @@
 
 #include <limits>
 #include <algorithm>
-#include <ctime>
-#include <cstdlib>
+#include <random>
+#include <chrono>
 
 #include "alg_constraint_handling.h"
 #include "individual.h"
@@ -10,117 +10,215 @@
 
 using namespace std;
 
-void InequalityConstraint(vector<double>& curr, 
-                                         const vector<double>& prev, 
-                                         const BProblem &prob)
+void InequalityConstraint(vector<double>& curr, const vector<double>& prev, const BProblem &prob)
 {
-    if (prev.size() == 0)
+    for (size_t i = 0; i < curr.size(); ++i)
     {
-        for (size_t i = 0; i < curr.size(); ++i)
+        const double Pmin = prob.limit(i, 0);
+        const double Pmax = prob.limit(i, 1);
+
+        if (prev.size() == 0)
         {
-            if (curr[i] < prob.limit(i, 0))
+            if (curr[i] < Pmin)
             {
-                curr[i] = prob.limit(i, 0);
+                curr[i] = Pmin;
             }
 
-            if (curr[i] > prob.limit(i, 1))
+            if (curr[i] > Pmax)
             {
-                curr[i] = prob.limit(i, 1);
+                curr[i] = Pmax;
             }
         }
-    }
-    else
-    {
-        for (size_t i = 0; i < curr.size(); ++i)
+        else
         {
-            double lower = max(prob.limit(i, 0), prev[i] - prob.ramp(i, 1));
+            const double rampUp = prob.ramp(i, 0);
+            const double rampDown = prob.ramp(i, 1);
+
+            double lower = max(Pmin, prev[i] - rampDown);
             if (curr[i] < lower)
             {
                 curr[i] = lower;
             }
 
-            double upper = min(prob.limit(i, 1), prev[i] + prob.ramp(i, 0));
+            double upper = min(Pmax, prev[i] + rampUp);
             if (curr[i] > upper)
             {
                 curr[i] = upper;
             }
         }
     }
-
-    return;
 }
 
-double PowerOutput(const vector<double>& powers, const BProblem &prob)
+vector<double> PowerRemain(const vector<double>& curr, const vector<double>& prev, const int sign, const BProblem& prob)
 {
-    double provide = 0;
-    for (size_t i = 0; i < powers.size(); ++i)
-    {
-        provide += powers[i];
-    }
+    // Parameters.
+    size_t numMachines = prob.numMachines();
 
-    if (prob.B2(0, 0) != numeric_limits<double>::min())
+    vector<double> remains(numMachines);
+    
+    for (size_t i = 0; i < numMachines; ++i)
     {
-        double loss = 0;
-        for (size_t i = 0; i < powers.size(); ++i)
+        const double Pmin = prob.limit(i, 0);
+        const double Pmax = prob.limit(i, 1);
+
+        double bound;
+        if (prev.size() == 0)
         {
-            for (size_t j = 0; j < powers.size(); ++j)
+            if (sign == 1)
             {
-                loss += powers[i] * prob.B2(i, j) * powers[j];
+                bound = Pmax;
+            }
+            else
+            {
+                bound = Pmin;
+            }
+        }
+        else
+        {
+            const double rampUp = prob.limit(i, 0);
+            const double rampDown = prob.limit(i, 1);
+
+            if (sign == 1)
+            {
+                bound = min(Pmax, prev[i] + rampUp);
+            }
+            else
+            {
+                bound = max(Pmin, prev[i] - rampDown);
             }
         }
 
-        if (prob.B0() != numeric_limits<double>::min())
-        {
-            for (size_t i = 0; i < powers.size(); ++i)
-            {
-                loss += powers[i] * prob.B1(i);
-            }
-        }
-        
-        provide -= loss;
+        remains[i] = abs(curr[i] - bound);
     }
 
-    return provide;
+    return remains;
 }
 
-void DivisionCH::operator()(Individual& ind) const
+size_t RouletteWheel(const vector<double>& remains)
+{    
+    double sum = 0.0;
+    for (size_t i = 0; i < remains.size(); ++i)
+    {
+        sum += remains[i];
+    }
+
+    // Cannot adjust.
+    if (sum == 0.0)
+    {
+        return remains.size();
+    }
+
+    // Random engine.
+    default_random_engine gen(chrono::system_clock::now().time_since_epoch().count());
+    uniform_real_distribution<double> dis(0.0, 1.0);
+
+    double r1 = dis(gen);
+
+    double range = 0;
+
+    for (size_t i = 0; i < remains.size(); ++i)
+    {
+        range += remains[i] / sum;
+
+        if (r1 < range)
+        {
+            return i;
+        }
+    }
+}
+
+void DivisionCH::operator()(Individual& ind, const size_t maxTry, const double threshold) const
 {
-    const BProblem &prob = Individual::prob();
+    // Parameters.
+    size_t numPeriods = Individual::prob().numPeriods();
+    size_t numMachines = Individual::prob().numMachines();
+
     double supply;
 
     vector<double> prev;
-    for (int t = 0; t < prob.numPeriods(); ++t)
+    for (int t = 0; t < numPeriods; ++t)
     {
-        vector<double> power_t(ind.encoding().begin() + t * prob.numMachines(), ind.encoding().begin() + (t + 1) * prob.numMachines());
+        const double demand = Individual::prob().load(t);
 
-        for (size_t i = 0; i < power_t.size(); ++i)
+        vector<double> power_t = ind.Decoder(t);
+
+        InequalityConstraint(power_t, prev, Individual::prob());
+        supply = Individual::PowerOutput(power_t);
+
+        double diff = demand - supply;
+
+        size_t i = 0;
+        while (i < maxTry)
         {
-            power_t[i] = prob.limit(i, 0) + power_t[i] * (prob.limit(i, 1) - prob.limit(i, 0));
-        }
+            if (abs(diff) < threshold)
+            {
+                break;
+            }
 
-        InequalityConstraint(power_t, prev, prob);
-        supply = PowerOutput(power_t, prob);
-
-        int i = 0;
-        int MAXTRY = 100;
-        while (i < MAXTRY && abs(supply - prob.load(t)) > 0.00001)
-        {
-            double div = (prob.load(t) - supply) / prob.numMachines();
-            for (int j = 0; j < prob.numMachines(); ++j)
+            // Adjust all machines.
+            double div = diff / numMachines;
+            for (int j = 0; j < numMachines; ++j)
             {
                 power_t[j] += div;
             }
 
-            InequalityConstraint(power_t, prev, prob);
-            supply = PowerOutput(power_t, prob);
+            InequalityConstraint(power_t, prev, Individual::prob());
+            supply = Individual::PowerOutput(power_t);
 
             i++;
         }
         
-        for (int j = 0; j < prob.numMachines(); ++j)
+        ind.Encoder(t, power_t);
+
+        prev = power_t;
+    }
+
+    return;
+}
+void FineTuningCH::operator()(Individual& ind, const size_t maxTry, const double threshold) const
+{
+    // Parameters.
+    size_t numPeriods = Individual::prob().numPeriods();
+    size_t numMachines = Individual::prob().numMachines();
+
+    default_random_engine gen(chrono::system_clock::now().time_since_epoch().count());
+    uniform_int_distribution<size_t> dis(0, numMachines - 1);
+
+    double supply;
+
+    vector<double> prev;
+    for (int t = 0; t < numPeriods; ++t)
+    {
+        const double demand = Individual::prob().load(t);
+
+        vector<double> power_t = ind.Decoder(t);
+
+        InequalityConstraint(power_t, prev, Individual::prob());
+        supply = Individual::PowerOutput(power_t);
+
+        double diff = demand - supply;
+
+        int i = 0;
+        while (i < maxTry)
         {
-            ind.encoding()[t * prob.numMachines() + j] = (power_t[j] - prob.limit(j, 0)) / (prob.limit(j, 1) - prob.limit(j, 0));
+            if (abs(diff) < threshold)
+            {
+                break;
+            }
+
+            size_t j = dis(gen);
+
+            power_t[j] = power_t[j] + diff;
+
+            InequalityConstraint(power_t, prev, Individual::prob());
+            supply = Individual::PowerOutput(power_t);
+
+            diff = demand - supply;
+
+            i++;
         }
+
+        ind.Encoder(t, power_t);
 
         prev = power_t;
     }
@@ -128,44 +226,66 @@ void DivisionCH::operator()(Individual& ind) const
     return;
 }
 
-void FineTuningCH::operator()(Individual& ind) const
+void TFineTuningCH::operator()(Individual& ind, const size_t maxTry, const double threshold) const
 {
-    srand(time(NULL));
+    // Parameters.
+    size_t numPeriods = Individual::prob().numPeriods();
+    size_t numMachines = Individual::prob().numMachines();
 
-    const BProblem& prob = Individual::prob();
     double supply;
 
     vector<double> prev;
-    for (int t = 0; t < prob.numPeriods(); ++t)
+    for (int t = 0; t < numPeriods; ++t)
     {
-        vector<double> power_t(ind.encoding().begin() + t * prob.numMachines(), ind.encoding().begin() + (t + 1) * prob.numMachines());
+        const double demand = Individual::prob().load(t);
 
-        for (size_t i = 0; i < power_t.size(); ++i)
-        {
-            power_t[i] = prob.limit(i, 0) + power_t[i] * (prob.limit(i, 1) - prob.limit(i, 0));
-        }
+        vector<double> power_t = ind.Decoder(t);
 
-        InequalityConstraint(power_t, prev, prob);
-        supply = PowerOutput(power_t, prob);
+        InequalityConstraint(power_t, prev, Individual::prob());
+        supply = Individual::PowerOutput(power_t);
+
+        double diff = demand - supply;
 
         int i = 0;
-        int MAXTRY = 100;
-        while (i < MAXTRY && abs(supply - prob.load(t)) > 0.00001)
+        while (i < maxTry)
         {
-            size_t j = rand() % prob.numMachines();
+            if (abs(diff) < threshold)
+            {
+                break;
+            }
             
-            power_t[j] += prob.load(t) - supply;
+            // How much can adjusting.
+            vector<double> remains;
+            int sign;
+            if (diff < 0)
+            {
+                sign = -1;
+                remains = PowerRemain(power_t, prev, sign, Individual::prob());
+            }
+            else
+            {
+                sign = 1;
+                remains = PowerRemain(power_t, prev, sign, Individual::prob());
+            }
 
-            InequalityConstraint(power_t, prev, prob);
-            supply = PowerOutput(power_t, prob);
+            // Choose a machine by roulette wheel.
+            size_t j = RouletteWheel(remains);
+            if (j == numMachines)
+            {
+                break;
+            }
+
+            power_t[j] += min(abs(diff), remains[j]) * double(sign);
+
+            InequalityConstraint(power_t, prev, Individual::prob());
+            supply = Individual::PowerOutput(power_t);
+
+            diff = demand - supply;
 
             i++;
         }
 
-        for (int j = 0; j < prob.numMachines(); ++j)
-        {
-            ind.encoding()[t * prob.numMachines() + j] = (power_t[j] - prob.limit(j, 0)) / (prob.limit(j, 1) - prob.limit(j, 0));
-        }
+        ind.Encoder(t, power_t);
 
         prev = power_t;
     }

@@ -14,9 +14,9 @@ public:
     explicit BaseEA(std::string name) : name_(name) {}
     ~BaseEA() {}
 
-    virtual bool Setup(std::ifstream&) = 0;
+    virtual bool Setup(std::ifstream& file) = 0;
 
-    virtual void Solve(Population&, const BProblem&, Log&) = 0;
+    virtual void Solve(Population& sol, const BProblem& prob, Log& log) = 0;
 
 protected:
     std::string name_;

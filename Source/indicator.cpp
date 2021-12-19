@@ -65,10 +65,13 @@ double IGD::operator()(const Population& pop)
 
 size_t Compromise::operator()(const Population& pop) const
 {
+    // Parameters.
+    size_t numObjectives = Individual::prob().numObjectives();
+
     vector<double> fmin(2);
     vector<double> fmax(2);
 
-    for (size_t i = 0; i < Individual::prob().numObjectives(); ++i)
+    for (size_t i = 0; i < numObjectives; ++i)
     {
         double min = pop[0].objs()[i];
         double max = min;
@@ -99,7 +102,7 @@ size_t Compromise::operator()(const Population& pop) const
     for (size_t i = 0; i < pop.size(); ++i)
     {
         double cur;
-        for (size_t j = 0; j < Individual::prob().numObjectives(); ++j)
+        for (size_t j = 0; j < numObjectives; ++j)
         {
             cur = pop[i].objs()[j];
 

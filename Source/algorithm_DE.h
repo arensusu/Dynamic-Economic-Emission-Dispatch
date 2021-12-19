@@ -9,9 +9,9 @@ public:
     explicit DE() : BaseEA("DE"), maxffe_(1000), Psize_(20), F_(0.5), CR_(0.5) {}
     ~DE() {}
 
-    virtual bool Setup(std::ifstream&);
+    virtual bool Setup(std::ifstream& file);
 
-    virtual void Solve (Population&, const BProblem&, Log&);
+    virtual void Solve (Population& sol, const BProblem& prob, Log& log);
 
 private:
     int maxffe_;

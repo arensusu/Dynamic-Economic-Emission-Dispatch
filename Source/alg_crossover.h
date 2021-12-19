@@ -6,7 +6,7 @@ class Individual;
 class BinaryCrossover
 {
 public:
-    void operator()(const Individual&, Individual&, const double) const;
+    void operator()(const Individual& target, Individual& mutant, const double CR) const;
 };
 
 #endif

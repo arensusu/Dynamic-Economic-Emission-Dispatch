@@ -10,6 +10,7 @@
 
 using namespace std;
 
+// Left dominated right.
 bool Dominated(const Individual& l, const Individual& r)
 {
     bool better = false;
@@ -33,7 +34,8 @@ vector<vector<size_t>> NondominatedSort(const Population& pop)
     vector<size_t> curFront;
 
     vector<vector<size_t>> dominatedSet(pop.size());
-    vector<int> beDominated(pop.size(), 0);
+
+    vector<size_t> beDominated(pop.size(), 0);
 
     for (size_t i = 0; i < pop.size(); ++i)
     {
@@ -41,11 +43,11 @@ vector<vector<size_t>> NondominatedSort(const Population& pop)
         {
             if (i == j) continue;
 
-            if (Dominated(pop[i], pop[j]))
+            if (Dominated(pop[i], pop[j]))          // I dominate the other.
             {
                 dominatedSet[i].push_back(j);
             }
-            else if (Dominated(pop[j], pop[i]))
+            else if (Dominated(pop[j], pop[i]))     // The orther dominates me.
             {
                 beDominated[i]++;
             }
@@ -61,13 +63,17 @@ vector<vector<size_t>> NondominatedSort(const Population& pop)
 
     while (curFront.size() != 0)
     {
+        // Store the completed front.
         fronts.push_back(curFront);
         size_t prevFrontSize = curFront.size();
         curFront.clear();
 
+        // Remove the previous front and construct the new one.
         for (size_t i = 0; i < prevFrontSize; ++i)
         {
-            vector<size_t>& curSet = dominatedSet[fronts[rank - 1][i]];
+            size_t index = fronts[rank - 1][i];
+            vector<size_t>& curSet = dominatedSet[index];
+
             for (size_t j = 0; j < curSet.size(); ++j)
             {
                 if ((--beDominated[curSet[j]]) == 0)
@@ -76,6 +82,7 @@ vector<vector<size_t>> NondominatedSort(const Population& pop)
                 }
             }
         }
+
         rank++;
     }
 
@@ -84,8 +91,11 @@ vector<vector<size_t>> NondominatedSort(const Population& pop)
 
 
 
-void CrowdingDistanceSort(vector<size_t> &front, const Population &pop)
+void CrowdingDistanceSort(vector<size_t>& front, const Population& pop)
 {
+    // Parameters.
+    size_t numObjectives = Individual::prob().numObjectives();
+
     vector<vector<double>> objIndex(front.size(), vector<double>(3));
     for (size_t i = 0; i < front.size(); ++i)
     {
@@ -94,23 +104,30 @@ void CrowdingDistanceSort(vector<size_t> &front, const Population &pop)
         objIndex[i][2] = 0;
     }
     
-    for (size_t i = 0; i < Individual::prob().numObjectives(); ++i)
+    for (size_t i = 0; i < numObjectives; ++i)
     {
+        // Get one of the objectives.
         for (size_t j = 0; j < objIndex.size(); ++j)
         {
-            objIndex[j][0] = pop[size_t(objIndex[j][1])].objs()[i];
+            size_t index = size_t(objIndex[j][1]);
+
+            objIndex[j][0] = pop[index].objs()[i];
         }
 
         sort(objIndex.begin(), objIndex.end());
 
+        // Endpoints are infinite.
         objIndex[0][2] = numeric_limits<double>::max();
         objIndex[objIndex.size() - 1][2] = numeric_limits<double>::max();
+
+        // Euclidean distance.
         for (size_t j = 1; j < objIndex.size() - 1; ++j)
         {
             objIndex[j][2] += (objIndex[j + 1][0] - objIndex[j - 1][0]) / (objIndex[objIndex.size() - 1][0] - objIndex[0][0]);
         }
     }
 
+    // Sort by crowding distance.
     for (size_t i = 0; i < objIndex.size(); ++i)
     {
         objIndex[i][0] = objIndex[i][2];
@@ -120,6 +137,8 @@ void CrowdingDistanceSort(vector<size_t> &front, const Population &pop)
 
     for (size_t i = 0; i < objIndex.size(); ++i)
     {
-        front[i] = size_t(objIndex[objIndex.size() - 1 - i][1]);
+        size_t index = size_t(objIndex.size() - 1 - i);
+
+        front[i] = size_t(objIndex[index][1]);
     }
 }

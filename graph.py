@@ -17,8 +17,8 @@ for prob in probList :
   except IOError :
     continue
   
-  xAxis = x[INDEX]
-  yAxis = y[INDEX]
+  #xAxis = x[INDEX]
+  #yAxis = y[INDEX]
 
   #if not os.path.exists(pname) :
   #  os.mkdir(pname)
@@ -62,7 +62,7 @@ for prob in probList :
 
     i += 1
 
-  plt.plot(np.array(igd[200:]))
+  plt.plot(np.array(igd[:]))
   plt.xlabel('Iteration')
   plt.ylabel('IGD')
 

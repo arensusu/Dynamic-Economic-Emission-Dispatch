@@ -11,21 +11,31 @@ class Population;
 class Log
 {
 public:
-    explicit Log(const std::string&);
+    explicit Log(const std::string& name, const size_t run);
     ~Log() { trend_.close(); }
 
-    void All(const Population&);
-    void Trend(const Population&, const std::size_t);
-    void FinalFront(const Population&);
+    // All individuals.
+    void All(const Population& pop);
+
+    // Pareto front.
+    void Front(const Population& pop);
+
+    // Pareto front of all runs.
+    void Average(const Population& pop);
 
     void RecordIGD() { igdVals_.push_back(igd_.val()); }
 
-    void operator()(const int);
+    // Setup the file of run.
+    void operator()(const int i);
 
 private:
-    IGD igd_;
+    std::size_t final_;
+
     std::string pname_;
+
     std::ofstream trend_;
+
+    IGD igd_;
     std::vector<double> igdVals_;
 
 };

@@ -10,25 +10,29 @@ bool NProblem::SetCoeff(ifstream& file)
 {
     file >> numMachines_;
 
-    size_t numCoeff = 10;
+    size_t numCoeffs = 10;
     limits_.resize(numMachines_, vector<double>(2, 0));
-    coeffs_.resize(numMachines_, vector<double>(numCoeff, 0));
+    coeffs_.resize(numMachines_, vector<double>(numCoeffs, 0));
     ramps_.resize(numMachines_, vector<double>(2, 0));
 
     size_t i = -1, j = -1;
     for (i = 0; i < numMachines_; ++i)
     {
+        // Pmin, Pmax.
         file >> limits_[i][0] >> limits_[i][1];
 
+        // Upper, Lower.
         file >> ramps_[i][0] >> ramps_[i][1];
 
-        for (j = 0; j < numCoeff; ++j)
+        // Coefficients of cost and emission.
+        for (j = 0; j < numCoeffs; ++j)
         {
             file >> coeffs_[i][j];
         }
     }
 
-    if (i < numMachines_ || j < numCoeff)
+    // Legally check.
+    if (i < numMachines_ || j < numCoeffs)
     {
         return false;
     }
@@ -45,9 +49,11 @@ bool NProblem::SetLoad(ifstream& file)
     size_t i;
     for (i = 0; i < numPeriods_; ++i)
     {
+        // Loads.
         file >> loads_[i];
     }
 
+    // Legally check.
     if (i < numPeriods_)
     {
         return false;
@@ -88,6 +94,7 @@ bool NProblem::Evaluate(vector<double>& objs, const vector<double>& powers) cons
                   + coeff(j, 1) * powers[i * numMachines_ + j]
                   + coeff(j, 2) * pow(powers[i * numMachines_ + j], 2.0)
                   + abs(coeff(j, 3) * sin(coeff(j, 4) * (limit(j, 0) - powers[i * numMachines_ + j])));
+            
             emission += coeff(j, 5)
                       + coeff(j, 6) * powers[i * numMachines_ + j]
                       + coeff(j, 7) * pow(powers[i * numMachines_ + j], 2.0)
@@ -95,12 +102,8 @@ bool NProblem::Evaluate(vector<double>& objs, const vector<double>& powers) cons
         }
     }
 
-    if (i < numPeriods_ || j < numMachines_)
-    {
-        return false;
-    }
-    objs.push_back(cost);
-    objs.push_back(emission);
+    objs[0] = cost;
+    objs[1] = emission;
 
     return true;
 }

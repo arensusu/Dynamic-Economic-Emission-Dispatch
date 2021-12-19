@@ -8,8 +8,7 @@
 #include "indicator.h"
 #include "alg_sorting.h"
 #include "alg_env_selection.h"
-
-#define FINAL_SIZE 20
+#include "alg_sorting.h"
 
 using namespace std;
 
@@ -19,7 +18,7 @@ bool firstComp(const Individual l, const Individual r)
     else return false;
 }
 
-Log::Log(const string& name)
+Log::Log(const string& name, const size_t run)
 {
     igd_ = IGD(name);
 
@@ -28,60 +27,48 @@ Log::Log(const string& name)
     {
         filesystem::create_directory(pname_);
     }
-}
 
-void Log::operator()(const int i)
-{
-    trend_.close();
-    trend_.open(pname_ + "/" + to_string(i) + ".trend", ios::out);
+    final_ = run * 5;
 }
 
 void Log::All(const Population& pop)
 {
+    // Parameters.
+    size_t numObjectives = Individual::prob().numObjectives();
+
     for (size_t i = 0; i < pop.size(); ++i)
     {
         trend_ << "(";
-        for (size_t j = 0; j < Individual::prob().numObjectives(); ++j)
+        for (size_t j = 0; j < numObjectives; ++j)
         {
             trend_ << pop[i].objs()[j] << " ";
         }
-        trend_ << "), ";
+        trend_ << "),";
     }
     trend_ << endl;
 
     return;
 }
 
-void Log::Trend(const Population& pop, const size_t numPareto)
+void Log::Front(const Population& pop)
 {
     Population paretoPop;
-    for (size_t i = 0; i < numPareto; ++i)
+    vector<vector<size_t>> fronts = NondominatedSort(pop);
+    for (size_t i = 0; i < fronts[0].size(); ++i)
     {
-        //if (pop[i].Check())
-        {
-            paretoPop.push_back(pop[i]);
-        }
+        paretoPop.push_back(pop[fronts[0][i]]);
     }
 
     sort(paretoPop.begin(), paretoPop.end(), firstComp);
 
-    for (size_t i = 0; i < paretoPop.size(); ++i)
-    {
-        trend_ << "(";
-        for (size_t j = 0; j < Individual::prob().numObjectives(); ++j)
-        {
-            trend_ << paretoPop[i].objs()[j] << " ";
-        }
-        trend_ << "), ";
-    }
-    trend_ << endl;
+    All(paretoPop);
 
     trend_ << "IGD : " << igd_(paretoPop) << endl;
 
     return;
 }
 
-void Log::FinalFront(const Population& pop)
+void Log::Average(const Population& pop)
 {
     ofstream all(pname_ + "/all.avg", ios::out);
 
@@ -100,21 +87,21 @@ void Log::FinalFront(const Population& pop)
     all << "Max_IGD : " << igdVals_[igdVals_.size() - 1] << endl;
     all << "Avg_IGD : " << avgIgd << endl;
 
-    //front
+    //Feasible check.
     Population feasiblePop;
     for (size_t i = 0; i < pop.size(); ++i)
     {
-        if (pop[i].Check())
+        if (pop[i].Check(0.00001))
         {
             feasiblePop.push_back(pop[i]);
         }
     }
 
+    // Pareto front.
     size_t frontSize;
-    Population paretoSet(FINAL_SIZE);
+    Population paretoSet(final_);
 
     BasicEnvSelection env;
-
     if (feasiblePop.size() == 0)
     {
         frontSize = env(paretoSet, pop);
@@ -135,10 +122,11 @@ void Log::FinalFront(const Population& pop)
         {
             all << paretoSet[i].objs()[j] << " ";
         }
-        all << "), ";
+        all << "),";
     }
     all << "\n\n";
 
+    // Compromise.
     Compromise comp;
     size_t index = comp(paretoSet);
 
@@ -152,5 +140,10 @@ void Log::FinalFront(const Population& pop)
     }
 
     all.close();
-    return;
+}
+
+void Log::operator()(const int i)
+{
+    trend_.close();
+    trend_.open(pname_ + "/" + to_string(i) + ".trend", ios::out);
 }

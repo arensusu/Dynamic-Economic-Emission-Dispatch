@@ -7,26 +7,19 @@ class Individual;
 class RandOneMutation
 {
 public:
-    void operator()(Population&, const double, const int) const;
+    void operator()(Population& pop, const double F, const std::size_t pos) const;
 };
-
 
 class BestOneMutation
 {
 public:
-    void operator()(Population&, const double, const int) const;
+    void operator()(Population& pop, const double F, const std::size_t pos) const;
 };
 
-class PolynToCurMutation
+class CurrentToBestMutation
 {
 public:
-    void operator()(Population&, const double, const std::size_t, const double eta = 20) const;
-};
-
-class PolynamialMutation
-{
-public:
-    void operator()(Individual&, const double eta = 20) const;
+    void operator()(Population& pop, const double F, const std::size_t pos) const;
 };
 
 #endif

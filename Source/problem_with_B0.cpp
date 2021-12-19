@@ -6,26 +6,24 @@ using namespace std;
 bool WBProblem::SetB(ifstream& file)
 {
     B2_.resize(numMachines_, vector<double>(numMachines_, 0));
+    
     string dummy;
-
     file >> dummy;
+
     size_t i = -1, j = -1;
     for (i = 0; i < numMachines_; ++i)
     {
         for (j = 0; j < numMachines_; ++j)
         {
+            // Quadratic term.
             file >> B2_[i][j];
         }
     }
 
+    // Legally check.
     if (i < numMachines_ || j < numMachines_)
     {
         return false;
-    }
-
-    if (file.eof())
-    {
-        return true;
     }
 
     B1_.resize(numMachines_, 0);
@@ -33,33 +31,28 @@ bool WBProblem::SetB(ifstream& file)
     file >> dummy;
     for (size_t i = 0; i < numMachines_; ++i)
     {
+        // Linear term.
         file >> B1_[i];
     }
 
+    // Legally check.
     if (i < numMachines_)
     {
         return false;
     }
 
     file >> dummy;
+    // Constant term.
     file >> B0_;
 
-    if (file.eof())
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-
+    return true;
 }
 
 bool WBProblem::Read(const string& fname)
 {
-    //modify path
     ifstream fileC("./Dataset/Generator/" + fname + ".txt", ios::in);
 
+    // Information of generators.
     if (!SetCoeff(fileC))
     {
         return false;
@@ -72,9 +65,9 @@ bool WBProblem::Read(const string& fname)
 
     fileC >> numObjectives_;
 
-    //modify path
     ifstream fileB("./Dataset/B_Coeff/" + fname + ".txt", ios::in);
 
+    // Coefficients of loss.
     if (!SetB(fileB))
     {
         return false;

@@ -6,7 +6,7 @@ class Population;
 class BasicEnvSelection
 {
 public:
-    size_t operator()(Population&, const Population&) const;
+    size_t operator()(Population& children, const Population& parents) const;
 };
 
 #endif

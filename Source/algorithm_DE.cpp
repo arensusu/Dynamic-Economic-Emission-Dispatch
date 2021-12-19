@@ -11,6 +11,7 @@
 #include "alg_crossover.h"
 #include "alg_mutation.h"
 #include "alg_env_selection.h"
+#include "alg_diversity.h"
 
 #include "log.h"
 
@@ -32,21 +33,23 @@ bool DE::Setup(ifstream& file)
 
 void DE::Solve(Population& sol, const BProblem& prob, Log& log)
 {
-    DivisionCH ch;
-    //FineTuningCH ch;
+    //DivisionCH ch;
+    FineTuningCH ch;
     RandomInitialization initialization;
     //BestOneMutation mutation;
-    //RandOneMutation mutation;
-    PolynToCurMutation mutation;
+    //CurrentToBestMutation mutation;
+    RandOneMutation mutation;
+    //PolynToCurMutation mutation;
     BinaryCrossover crossover;
     BasicEnvSelection envSelection;
+    PolynamialMutation diversity;
 
     Population pop[2] = { Population(Psize_) };
-    int curr = 0, next = 1;
+    size_t curr = 0, next = 1;
     int ffe = 0;
 
     //initialization
-    initialization(pop[curr], Individual::prob());
+    initialization(pop[curr], prob);
     for (size_t i = 0; i < Psize_; ++i)
     {
         //CH
@@ -55,10 +58,8 @@ void DE::Solve(Population& sol, const BProblem& prob, Log& log)
         ffe++;
     }
 
-    while (ffe < maxffe_)
+    while (true)
     {
-        log.All(pop[curr]);
-
         pop[next].clear();
         pop[next].resize(Psize_);
 
@@ -66,25 +67,43 @@ void DE::Solve(Population& sol, const BProblem& prob, Log& log)
 
         for (size_t i = 0; i < Psize_; ++i)
         {
+
             //mutation
             mutation(pop[curr], F_, i);
+
             //crossover
             crossover(pop[curr][i], pop[curr][Psize_ + i], CR_);
+
             //CH
             ch(pop[curr][Psize_ + i]);
-
             prob.Evaluate(pop[curr][Psize_ + i]);
-
             ffe++;
         }
         //selection
-        size_t numPareto;
-        numPareto = envSelection(pop[next], pop[curr]);
+        envSelection(pop[next], pop[curr]);
 
         //print objectives
-        log.Trend(pop[next], numPareto);
+        log.All(pop[next]);
+        log.Front(pop[next]);
 
         swap(pop[curr], pop[next]);
+
+        if (ffe >= maxffe_)
+        {
+            break;
+        }
+
+        //diversity
+        
+        size_t numVariables = prob.numVariables();
+        for (size_t i = 0; i < Psize_; ++i)
+        {
+            diversity(pop[curr][i], 1.0 / double(numVariables));
+            ch(pop[curr][i]);
+            prob.Evaluate(pop[curr][i]);
+            ffe++;
+        }
+        
     }
 
     sol = pop[curr];

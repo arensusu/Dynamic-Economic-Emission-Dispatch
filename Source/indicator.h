@@ -9,10 +9,10 @@ class Population;
 class IGD
 {
 public:
-    explicit IGD(const std::string&);
+    explicit IGD(const std::string& name);
     IGD() {}
 
-    double operator()(const Population&);
+    double operator()(const Population& pop);
 
     double val() const { return val_; }
 
@@ -25,7 +25,7 @@ private:
 class Compromise
 {
 public:
-    std::size_t operator()(const Population&) const;
+    std::size_t operator()(const Population& pop) const;
 
 };
 

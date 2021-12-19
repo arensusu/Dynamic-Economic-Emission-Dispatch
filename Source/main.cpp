@@ -10,6 +10,7 @@
 #include "indicator.h"
 
 #include <vector>
+#include <ctime>
 #include "individual.h"
 #include "alg_sorting.h"
 
@@ -17,6 +18,8 @@ using namespace std;
 
 void TestEvaluated(const BProblem* prob)
 {
+    Individual::SetProblem(*prob);
+    Individual ind;
     vector<double> enc(prob->numVariables());
 
     ifstream file("test.txt", ios::in);
@@ -30,10 +33,21 @@ void TestEvaluated(const BProblem* prob)
         }
     }
 
-    vector<double> objs;
-    prob->Evaluate(objs, enc);
+    ind.Encoder(enc);
+    prob->Evaluate(ind);
+    bool isFeasible = ind.Check(0.00001);
 
-    cout << objs[0] << " " << objs[1] << endl;
+    if (!isFeasible)
+    {
+        const vector<double> output = ind.PowerOutput();
+        for (size_t i = 0; i < output.size(); ++i)
+        {
+            cout << output[i] << " ";
+        }
+        cout << endl;
+    }
+
+    cout << ind.objs()[0] << " " << ind.objs()[1] << endl;
 }
 
 void TestDominated()
@@ -65,20 +79,24 @@ int main()
     SetExperiment(&ea, probList, exp);
     exp.close();
 
+    /*
+    BProblem* prob = nullptr;
+    SetProblemType(&prob, "10_24_WOB");
+    TestEvaluated(prob);
+    */
     for (size_t i = 0; i < probList.size(); ++i)
     {
         BProblem* prob = nullptr;
         SetProblemType(&prob, probList[i]);
         IGD igd(probList[i]);
         
-        //TestEvaluated(prob);
-        
         Individual::SetProblem(*prob);
         
         Population avg;
-        Log log(probList[i]);
 
         int RUN = 20;
+        Log log(probList[i], RUN);
+
         for (int r = 0; r < RUN; ++r)
         {
             log(r);
@@ -89,7 +107,7 @@ int main()
             cout << "Run " << r << " finished." << endl;
         }
         
-        log.FinalFront(avg);
+        log.Average(avg);
         cout << "Problem " << probList[i] << " finished." << endl;
     }
 

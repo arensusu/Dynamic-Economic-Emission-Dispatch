@@ -18,13 +18,18 @@ size_t BasicEnvSelection::operator()(Population& children, const Population& par
     
     while (remains > 0 && rank < fronts.size())
     {
+        // Space is enough.
         if (remains > fronts[rank].size())
         {
             for (size_t i = 0; i < fronts[rank].size(); ++i)
             {
-                children[children.size() - remains] = parents[fronts[rank][i]];
+                size_t pos = children.size() - remains;
+                size_t index = fronts[rank][i];
+
+                children[pos] = parents[index];
                 remains--;
             }
+
             rank++;
         }
         else
@@ -33,11 +38,16 @@ size_t BasicEnvSelection::operator()(Population& children, const Population& par
             
             for (size_t i = 0; i < remains; ++i)
             {
-                children[children.size() - remains + i] = parents[fronts[rank][i]];
+                size_t pos = children.size() - remains + i;
+                size_t index = fronts[rank][i];
+
+                children[pos] = parents[index];
             }
+
             remains = 0;
         }
     }
     
+    // Return the size of pareto fronts.
     return fronts[0].size() > children.size() ? children.size() : fronts[0].size();
 }

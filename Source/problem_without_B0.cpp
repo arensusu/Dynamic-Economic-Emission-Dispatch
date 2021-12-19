@@ -6,18 +6,21 @@ using namespace std;
 bool WOBProblem::SetB(ifstream& file)
 {
     B2_.resize(numMachines_, vector<double>(numMachines_, 0));
-    string dummy;
 
+    string dummy;
     file >> dummy;
+
     size_t i = -1, j = -1;
     for (i = 0; i < numMachines_; ++i)
     {
         for (j = 0; j < numMachines_; ++j)
         {
+            // Quadratic term.
             file >> B2_[i][j];
         }
     }
 
+    // Legally check.
     if (i < numMachines_ || j < numMachines_)
     {
         return false;
@@ -27,7 +30,7 @@ bool WOBProblem::SetB(ifstream& file)
 
 bool WOBProblem::Read(const string& fname)
 {
-    //modify path
+    // Information of generators.
     ifstream fileC("./Dataset/Generator/" + fname + ".txt", ios::in);
 
     if (!SetCoeff(fileC))
@@ -42,7 +45,7 @@ bool WOBProblem::Read(const string& fname)
 
     fileC >> numObjectives_;
 
-    //modify path
+    // Coefficients of loss.
     ifstream fileB("./Dataset/B_coeff/" + fname + ".txt", ios::in);
 
     if (!SetB(fileB))

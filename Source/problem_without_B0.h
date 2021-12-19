@@ -11,12 +11,12 @@ public:
 
     virtual const double B2(const std::size_t i, const std::size_t j) const { return B2_[i][j]; }
 
-    virtual bool Read(const std::string&);
+    virtual bool Read(const std::string& fname);
 
 private:
     std::vector<std::vector<double>> B2_;
 
-    virtual bool SetB(std::ifstream&);
+    virtual bool SetB(std::ifstream& file);
 };
 
 #endif

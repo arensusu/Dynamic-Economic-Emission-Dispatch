@@ -1,6 +1,6 @@
 
-#include <cstdlib>
-#include <ctime>
+#include <chrono>
+#include <random>
 
 #include "alg_initialization.h"
 #include "problem_base.h"
@@ -11,15 +11,14 @@ using namespace std;
 
 void RandomInitialization::operator()(Population& pop, const BProblem& prob) const
 {
-    srand(time(NULL));
+    default_random_engine gen(chrono::system_clock::now().time_since_epoch().count());
+    uniform_real_distribution<double> dis(0.0, 1.0);
+
     for (size_t i = 0; i < pop.size(); ++i)
     {
-        vector<double>& encoding = pop[i].encoding();
-        encoding.resize(prob.numVariables());
-
         for (size_t j = 0; j < prob.numVariables(); ++j)
         {
-            encoding[j] = double(rand() % 100) / 100;
+            pop[i][j] = dis(gen);
         }
     }
     return;
