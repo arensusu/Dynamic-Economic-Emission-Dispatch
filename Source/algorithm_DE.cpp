@@ -12,6 +12,7 @@
 #include "alg_mutation.h"
 #include "alg_env_selection.h"
 #include "alg_diversity.h"
+#include "alg_sorting.h"
 
 #include "log.h"
 
@@ -33,8 +34,8 @@ bool DE::Setup(ifstream& file)
 
 void DE::Solve(Population& sol, const BProblem& prob, Log& log)
 {
-    //DivisionCH ch;
-    FineTuningCH ch;
+    ProportionDivisionCH ch;
+    //FineTuningCH ch;
     RandomInitialization initialization;
     //BestOneMutation mutation;
     //CurrentToBestMutation mutation;
@@ -60,6 +61,8 @@ void DE::Solve(Population& sol, const BProblem& prob, Log& log)
 
     while (true)
     {
+        Adaptive(ffe);
+
         pop[next].clear();
         pop[next].resize(Psize_);
 
@@ -67,6 +70,11 @@ void DE::Solve(Population& sol, const BProblem& prob, Log& log)
 
         for (size_t i = 0; i < Psize_; ++i)
         {
+            // Diversity.
+            
+            Individual temp = pop[curr][i]; //
+            diversity(pop[curr][i], 1.0 / double(prob.numVariables()));   //
+            
 
             //mutation
             mutation(pop[curr], F_, i);
@@ -78,9 +86,20 @@ void DE::Solve(Population& sol, const BProblem& prob, Log& log)
             ch(pop[curr][Psize_ + i]);
             prob.Evaluate(pop[curr][Psize_ + i]);
             ffe++;
+
+            // If individual after mutated is better, replaced the origin one.
+            
+            ch(pop[curr][i]);   //
+            prob.Evaluate(pop[curr][i]);    //
+            ffe++;  //
+            if (!Dominated(pop[curr][i], temp))
+            {
+                pop[curr][i] = temp;    //
+            }
+            
         }
         //selection
-        envSelection(pop[next], pop[curr]);
+        size_t frontSize = envSelection(pop[next], pop[curr]);
 
         //print objectives
         log.All(pop[next]);
@@ -92,22 +111,21 @@ void DE::Solve(Population& sol, const BProblem& prob, Log& log)
         {
             break;
         }
-
-        //diversity
-        
-        size_t numVariables = prob.numVariables();
-        for (size_t i = 0; i < Psize_; ++i)
-        {
-            diversity(pop[curr][i], 1.0 / double(numVariables));
-            ch(pop[curr][i]);
-            prob.Evaluate(pop[curr][i]);
-            ffe++;
-        }
-        
     }
 
     sol = pop[curr];
     log.RecordIGD();
     
     return;
+}
+
+void DE::Adaptive(const int ffe)
+{
+    // Exponetial.
+    F_ = Fmin_ + (Fmax_ - Fmin_) * exp(-2.0 * double(ffe) / double(maxffe_));
+    CR_ = CRmin_ + (CRmax_ - CRmin_) * exp(-2.0 * (1.0 - double(ffe) / double(maxffe_)));
+    
+    // Linear.
+    //F_ = Fmax_ - (Fmax_ - Fmin_) * (double(ffe) / double(maxffe_));
+    //CR_ = CRmin_ + (CRmax_ - CRmin_) * (double(ffe) / double(maxffe_));
 }

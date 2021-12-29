@@ -130,9 +130,9 @@ void Log::Average(const Population& pop)
     Compromise comp;
     size_t index = comp(paretoSet);
 
-    all << "Best Cost : " << paretoSet[0].objs()[0] << ", " << paretoSet[0].objs()[1] << endl;
+    all << "Best-Cost : " << paretoSet[0].objs()[0] << ", " << paretoSet[0].objs()[1] << endl;
     all << "Compromise : " << paretoSet[index].objs()[0] << ", " << paretoSet[index].objs()[1] << endl;
-    all << "Best Emission : " << paretoSet[paretoSet.size() - 1].objs()[0] << ", " << paretoSet[paretoSet.size() - 1].objs()[1] << endl << endl;
+    all << "Best-Emission : " << paretoSet[paretoSet.size() - 1].objs()[0] << ", " << paretoSet[paretoSet.size() - 1].objs()[1] << endl << endl;
 
     for (size_t i = 0; i < paretoSet.size(); ++i)
     {

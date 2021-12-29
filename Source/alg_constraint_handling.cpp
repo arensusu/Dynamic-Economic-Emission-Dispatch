@@ -136,7 +136,7 @@ void DivisionCH::operator()(Individual& ind, const size_t maxTry, const double t
     double supply;
 
     vector<double> prev;
-    for (int t = 0; t < numPeriods; ++t)
+    for (size_t t = 0; t < numPeriods; ++t)
     {
         const double demand = Individual::prob().load(t);
 
@@ -157,13 +157,15 @@ void DivisionCH::operator()(Individual& ind, const size_t maxTry, const double t
 
             // Adjust all machines.
             double div = diff / numMachines;
-            for (int j = 0; j < numMachines; ++j)
+            for (size_t j = 0; j < numMachines; ++j)
             {
                 power_t[j] += div;
             }
 
             InequalityConstraint(power_t, prev, Individual::prob());
             supply = Individual::PowerOutput(power_t);
+
+            diff = demand - supply;
 
             i++;
         }
@@ -175,6 +177,7 @@ void DivisionCH::operator()(Individual& ind, const size_t maxTry, const double t
 
     return;
 }
+
 void FineTuningCH::operator()(Individual& ind, const size_t maxTry, const double threshold) const
 {
     // Parameters.
@@ -276,6 +279,84 @@ void TFineTuningCH::operator()(Individual& ind, const size_t maxTry, const doubl
             }
 
             power_t[j] += min(abs(diff), remains[j]) * double(sign);
+
+            InequalityConstraint(power_t, prev, Individual::prob());
+            supply = Individual::PowerOutput(power_t);
+
+            diff = demand - supply;
+
+            i++;
+        }
+
+        ind.Encoder(t, power_t);
+
+        prev = power_t;
+    }
+
+    return;
+}
+
+const vector<double> Proportion(const BProblem& prob)
+{
+    // Parameters.
+    const size_t numMachines = prob.numMachines();
+
+    double sum = 0.0;
+
+    vector<double> prop(numMachines);
+    for (size_t i = 0; i < numMachines; ++i)
+    {
+        const double Pmin = prob.limit(i, 0);
+        const double Pmax = prob.limit(i, 1);
+
+        prop[i] = Pmax - Pmin;
+
+        sum += prop[i];
+    }
+
+    for (size_t i = 0; i < numMachines; ++i)
+    {
+        prop[i] = prop[i] / sum;
+    }
+
+    return prop;
+}
+
+void ProportionDivisionCH::operator()(Individual& ind, const size_t maxTry, const double threshold) const
+{
+    // Parameters.
+    size_t numPeriods = Individual::prob().numPeriods();
+    size_t numMachines = Individual::prob().numMachines();
+
+    const vector<double> proportion = Proportion(Individual::prob());
+
+    double supply;
+
+    vector<double> prev;
+    for (size_t t = 0; t < numPeriods; ++t)
+    {
+        const double demand = Individual::prob().load(t);
+
+        vector<double> power_t = ind.Decoder(t);
+
+        InequalityConstraint(power_t, prev, Individual::prob());
+        supply = Individual::PowerOutput(power_t);
+
+        double diff = demand - supply;
+
+        size_t i = 0;
+        while (i < maxTry)
+        {
+            if (abs(diff) < threshold)
+            {
+                break;
+            }
+
+            // Adjust all machines.
+            for (size_t j = 0; j < numMachines; ++j)
+            {
+                power_t[j] += diff * proportion[j];
+            }
 
             InequalityConstraint(power_t, prev, Individual::prob());
             supply = Individual::PowerOutput(power_t);

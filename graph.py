@@ -62,7 +62,7 @@ for prob in probList :
 
     i += 1
 
-  plt.plot(np.array(igd[:]))
+  plt.plot(np.array(igd[200:]))
   plt.xlabel('Iteration')
   plt.ylabel('IGD')
 

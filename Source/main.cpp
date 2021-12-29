@@ -35,7 +35,7 @@ void TestEvaluated(const BProblem* prob)
 
     ind.Encoder(enc);
     prob->Evaluate(ind);
-    bool isFeasible = ind.Check(0.00001);
+    bool isFeasible = ind.Check();
 
     if (!isFeasible)
     {
@@ -72,29 +72,29 @@ void TestDominated()
 int main()
 {
     //TestDominated();
-    
+
     ifstream exp("exp.ini", ios::in);
     vector<string> probList;
     BaseEA* ea = nullptr;
     SetExperiment(&ea, probList, exp);
     exp.close();
 
-    /*
-    BProblem* prob = nullptr;
-    SetProblemType(&prob, "10_24_WOB");
-    TestEvaluated(prob);
-    */
+    
+    //BProblem* prob = nullptr;
+    //SetProblemType(&prob, "10_24_WOB");
+    //TestEvaluated(prob);
+    
     for (size_t i = 0; i < probList.size(); ++i)
     {
         BProblem* prob = nullptr;
         SetProblemType(&prob, probList[i]);
         IGD igd(probList[i]);
-        
+
         Individual::SetProblem(*prob);
-        
+
         Population avg;
 
-        int RUN = 20;
+        int RUN = 50;
         Log log(probList[i], RUN);
 
         for (int r = 0; r < RUN; ++r)
@@ -106,11 +106,10 @@ int main()
             avg.push_back(sol);
             cout << "Run " << r << " finished." << endl;
         }
-        
+
         log.Average(avg);
         cout << "Problem " << probList[i] << " finished." << endl;
     }
-
-    system("python graph.py");
     
+    system("python graph.py");
 }

@@ -147,7 +147,7 @@ const vector<double> Individual::PowerOutput() const
 }
 
 // Check with the threshold.
-bool Individual::Check(const double threshold = 0.00001) const
+bool Individual::Check(const double threshold) const
 {
     // Parameters.
     size_t numPeriods = problem_->numPeriods();

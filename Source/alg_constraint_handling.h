@@ -24,4 +24,10 @@ public:
     void operator()(Individual& ind, const std::size_t maxTry = 100, const double threshold = 0.00001) const;
 };
 
+class ProportionDivisionCH
+{
+public:
+    void operator()(Individual& ind, const std::size_t maxTry = 100, const double threshold = 0.00001) const;
+};
+
 #endif

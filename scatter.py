@@ -27,7 +27,7 @@ data.readline()
 i = 0
 for line in data.readlines() :
     if i % 3 == 0 :
-      for tup in line.strip('\n').split(', ') :
+      for tup in line.strip('\n').split(',') :
         lis = tup.strip('()').split(' ')
         if len(lis) != 3 :
           continue

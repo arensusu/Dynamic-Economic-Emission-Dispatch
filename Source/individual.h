@@ -36,7 +36,7 @@ public:
     const std::vector<double> PowerOutput() const;
 
     // Check the individual is feasible or not.
-    bool Check(const double threshold) const;
+    bool Check(const double threshold = 0.01) const;
 
     // Problem of all individuals.
     static void SetProblem(const BProblem& prob) { problem_ = &prob; }

@@ -18,6 +18,9 @@ public:
 
     virtual void Solve(Population& sol, const BProblem& prob, Log& log) = 0;
 
+    virtual double& F() = 0;
+    virtual double& CR() = 0;
+
 protected:
     std::string name_;
 
