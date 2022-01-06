@@ -94,7 +94,7 @@ int main()
 
         Population avg;
 
-        int RUN = 50;
+        int RUN = 20;
         Log log(probList[i], RUN);
 
         for (int r = 0; r < RUN; ++r)

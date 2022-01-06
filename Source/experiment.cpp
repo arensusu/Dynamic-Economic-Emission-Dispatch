@@ -4,6 +4,8 @@
 #include "experiment.h"
 #include "algorithm_base.h"
 #include "algorithm_DE.h"
+#include "algorithm_jDE.h"
+
 #include "problem_base.h"
 #include "problem_noloss.h"
 #include "problem_without_B0.h"
@@ -20,6 +22,10 @@ void SetExperiment(BaseEA** ea, vector<string>& probList, ifstream& file)
     if (algoName == "DE")
     {
         *ea = new DE();
+    }
+    else if (algoName == "jDE")
+    {
+        *ea = new JDE();
     }
 
     (*ea)->Setup(file);

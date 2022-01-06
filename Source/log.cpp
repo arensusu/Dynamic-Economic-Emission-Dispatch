@@ -64,8 +64,15 @@ void Log::Front(const Population& pop)
     All(paretoPop);
 
     trend_ << "IGD : " << igd_(paretoPop) << endl;
+}
 
-    return;
+void Log::Detail(const Population& pop)
+{
+    for (size_t i = 0; i < pop.size(); ++i)
+    {
+        detail_ << pop[i];
+    }
+    detail_ << endl;
 }
 
 void Log::Average(const Population& pop)
@@ -91,7 +98,7 @@ void Log::Average(const Population& pop)
     Population feasiblePop;
     for (size_t i = 0; i < pop.size(); ++i)
     {
-        if (pop[i].Check(0.00001))
+        //if (pop[i].Check())
         {
             feasiblePop.push_back(pop[i]);
         }
@@ -134,6 +141,8 @@ void Log::Average(const Population& pop)
     all << "Compromise : " << paretoSet[index].objs()[0] << ", " << paretoSet[index].objs()[1] << endl;
     all << "Best-Emission : " << paretoSet[paretoSet.size() - 1].objs()[0] << ", " << paretoSet[paretoSet.size() - 1].objs()[1] << endl << endl;
 
+    all << "Infeasible time : " << infeasibleTime_ << endl;
+
     for (size_t i = 0; i < paretoSet.size(); ++i)
     {
         all << paretoSet[i] << endl;
@@ -146,4 +155,7 @@ void Log::operator()(const int i)
 {
     trend_.close();
     trend_.open(pname_ + "/" + to_string(i) + ".trend", ios::out);
+
+    detail_.close();
+    detail_.open(pname_ + "/" + to_string(i) + ".detail", ios::out);
 }

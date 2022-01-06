@@ -34,4 +34,5 @@ private:
     std::vector<Individual> pop_;
 
 };
+
 #endif

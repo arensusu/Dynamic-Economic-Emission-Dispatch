@@ -14,12 +14,11 @@ public:
     explicit BaseEA(std::string name) : name_(name) {}
     ~BaseEA() {}
 
+    const std::string& Name() const { return name_; }
+
     virtual bool Setup(std::ifstream& file) = 0;
 
     virtual void Solve(Population& sol, const BProblem& prob, Log& log) = 0;
-
-    virtual double& F() = 0;
-    virtual double& CR() = 0;
 
 protected:
     std::string name_;

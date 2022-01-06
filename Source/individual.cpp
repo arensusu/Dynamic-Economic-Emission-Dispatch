@@ -173,22 +173,22 @@ bool Individual::Check(const double threshold) const
 // Print.
 ostream& operator<<(ostream& os, const Individual& ind)
 {
-    os << "Objectives: " << ind.objs()[0] << ", " << ind.objs()[1] << endl;
-
-    os << "Feasible: " << ind.Check();
+    //os << "Objectives: " << ind.objs()[0] << ", " << ind.objs()[1] << endl;
+    os << ind.objs()[0] << " " << ind.objs()[1];
+    //os << "Feasible: " << ind.Check();
 
     vector<double> powers = ind.Decoder();
 
-    size_t numMachines = Individual::prob().numMachines();
     for (size_t i = 0; i < powers.size(); ++i)
     {
-        if (i % numMachines == 0)
-        {
-            os << endl;
-        }
-
         os << " " << powers[i];
     }
+
+    if (ind.F() != -1 && ind.CR() != -1)
+    {
+        os << " " << ind.F() << " " << ind.CR();
+    }
+
     os << endl;
 
     return os;

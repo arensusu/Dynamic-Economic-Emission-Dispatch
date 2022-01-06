@@ -1,0 +1,8 @@
+dynamic_fin
+dynamic_prop
+dynamic_div_polyall
+dynamic_fin_polyall
+dynamic_prop_polyall
+jDE_fin
+jDE_prop
+jDE_prop_poly

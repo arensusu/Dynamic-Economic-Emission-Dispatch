@@ -12,7 +12,7 @@
 using namespace std;
 
 
-void RandOneMutation::operator()(Population& pop, const double F, const size_t pos) const
+void RandOneMutation::operator()(Population& pop, const size_t pos, const double F) const
 {
     // Parameters.
     size_t numVariables = Individual::prob().numVariables();
@@ -39,7 +39,7 @@ void RandOneMutation::operator()(Population& pop, const double F, const size_t p
     }
 }
 
-void BestOneMutation::operator() (Population& pop, const double F, const size_t pos) const
+void BestOneMutation::operator() (Population& pop, const size_t pos, const double F) const
 {
     // Parameters.
     size_t numVariables = Individual::prob().numVariables();
@@ -71,7 +71,7 @@ void BestOneMutation::operator() (Population& pop, const double F, const size_t 
     return;
 }
 
-void CurrentToBestMutation::operator()(Population& pop, const double F, const size_t pos) const
+void CurrentToBestMutation::operator()(Population& pop, const size_t pos, const double F) const
 {
     // Parameters.
     size_t numVariables = Individual::prob().numVariables();

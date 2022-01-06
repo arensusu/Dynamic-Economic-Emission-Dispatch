@@ -12,13 +12,16 @@ class Log
 {
 public:
     explicit Log(const std::string& name, const size_t run);
-    ~Log() { trend_.close(); }
+    ~Log() { trend_.close(); detail_.close(); }
 
     // All individuals.
     void All(const Population& pop);
 
     // Pareto front.
     void Front(const Population& pop);
+
+    // Genes of population.
+    void Detail(const Population& pop);
 
     // Pareto front of all runs.
     void Average(const Population& pop);
@@ -28,6 +31,8 @@ public:
     // Setup the file of run.
     void operator()(const int i);
 
+    void operator++(int) { infeasibleTime_++; }
+
 private:
     std::size_t final_;
 
@@ -35,9 +40,12 @@ private:
 
     std::ofstream trend_;
 
+    std::ofstream detail_;
+
     IGD igd_;
     std::vector<double> igdVals_;
 
+    std::size_t infeasibleTime_ = 0;
 };
 
 #endif

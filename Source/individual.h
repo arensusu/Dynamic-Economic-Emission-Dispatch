@@ -22,6 +22,12 @@ public:
     const double operator[](const int i) const { return encoding_[i]; }
     double& operator[](const int i) { return encoding_[i]; }
 
+    const double F() const { return F_; }
+    double& F() { return F_; }
+
+    const double CR() const { return CR_; }
+    double& CR() { return CR_; }
+
     // Normalize to [0, 1].
     void Encoder(const std::size_t t, const std::vector<double>& powers);
     void Encoder(const std::vector<double>& powers);
@@ -42,9 +48,13 @@ public:
     static void SetProblem(const BProblem& prob) { problem_ = &prob; }
     static const BProblem& prob() { return *problem_; }
 
-private:
+
+protected:
     std::vector<double> encoding_;
     std::vector<double> objectives_;
+
+    double F_ = -1;
+    double CR_ = -1;
 
     static const BProblem* problem_;
 };
