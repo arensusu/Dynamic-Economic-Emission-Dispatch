@@ -34,9 +34,9 @@ bool DE::Setup(ifstream& file)
 
 void DE::Solve(Population& sol, const BProblem& prob, Log& log)
 {
-    ProportionDivisionCH ch;
+    //ProportionDivisionCH ch;
     //DivisionCH ch;
-    //FineTuningCH ch;
+    FineTuningCH ch;
     RandomInitialization initialization;
     //BestOneMutation mutation;
     //CurrentToBestMutation mutation;
@@ -64,7 +64,7 @@ void DE::Solve(Population& sol, const BProblem& prob, Log& log)
     while (true)
     {
         // Adaptive control.
-        Adaptive(ffe);
+        //Adaptive(ffe);
 
         pop[next].clear();
         pop[next].resize(Psize_);

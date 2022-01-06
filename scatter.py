@@ -6,9 +6,9 @@ x = [[40000, 60000], [2500000, 2800000], [650000, 750000]]
 y = [[15000, 30000], [300000, 350000], [300000, 500000]]
 
 probList = ["5_24_WOB", "10_24_WOB", "15_24_WOB", "30_24_N", "40_24_N"]
-pname = './Output/0.5_0.5_fin_poly/'
+pname = './Output/0.5_0.5_div/'
 
-INDEX = 1
+INDEX = 0
 prob = probList[INDEX]
 
 data = open(pname + prob + '/0.trend', 'r')
@@ -23,7 +23,6 @@ igd = []
 costs = []
 emissions = []
 
-data.readline()
 i = 0
 for line in data.readlines() :
     if i % 3 == 0 :
@@ -41,8 +40,7 @@ for line in data.readlines() :
       plt.xlabel('Cost')
       plt.ylabel('Emission')
 
-      if i % 3 == 0:
-        plt.savefig(pname + "FIG/" + str(i // 3) + '.png', dpi = 600)
+      plt.savefig(pname + "FIG/" + str(i // 3) + '.png', dpi = 600)
 
       plt.clf()
 

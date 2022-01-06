@@ -34,10 +34,10 @@ double IGD::operator()(const Population& pop)
         return 1;
     }
 
-    double Cmin = refs_[0][0];
-    double Cmax = refs_[refs_.size() - 1][0];
-    double Emin = refs_[refs_.size() - 1][1];
-    double Emax = refs_[0][1];
+    double Cmin = min(refs_[0][0], pop[0].objs()[0]);
+    double Cmax = max(refs_[refs_.size() - 1][0], pop[pop.size() - 1].objs()[0]);
+    double Emin = min(refs_[refs_.size() - 1][1], pop[pop.size() - 1].objs()[1]);
+    double Emax = max(refs_[0][1], pop[0].objs()[1]);
 
     for (size_t i = 0; i < refs_.size(); ++i)
     {        
