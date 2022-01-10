@@ -6,7 +6,6 @@
 #include "population.h"
 #include "individual.h"
 #include "indicator.h"
-#include "alg_sorting.h"
 #include "alg_env_selection.h"
 #include "alg_sorting.h"
 
@@ -33,21 +32,7 @@ Log::Log(const string& name, const size_t run)
 
 void Log::All(const Population& pop)
 {
-    // Parameters.
-    size_t numObjectives = Individual::prob().numObjectives();
-
-    for (size_t i = 0; i < pop.size(); ++i)
-    {
-        trend_ << "(";
-        for (size_t j = 0; j < numObjectives; ++j)
-        {
-            trend_ << pop[i].objs()[j] << " ";
-        }
-        trend_ << "),";
-    }
-    trend_ << endl;
-
-    return;
+    trend_ << igd_(pop) << endl;
 }
 
 void Log::Front(const Population& pop)
@@ -154,7 +139,7 @@ void Log::Average(const Population& pop)
 void Log::operator()(const int i)
 {
     trend_.close();
-    trend_.open(pname_ + "/" + to_string(i) + ".trend", ios::out);
+    trend_.open(pname_ + "/" + to_string(i) + ".igd", ios::out);
 
     detail_.close();
     detail_.open(pname_ + "/" + to_string(i) + ".detail", ios::out);

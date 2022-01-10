@@ -34,9 +34,9 @@ bool DE::Setup(ifstream& file)
 
 void DE::Solve(Population& sol, const BProblem& prob, Log& log)
 {
-    //ProportionDivisionCH ch;
+    ProportionDivisionCH ch;
     //DivisionCH ch;
-    FineTuningCH ch;
+    //FineTuningCH ch;
     RandomInitialization initialization;
     //BestOneMutation mutation;
     //CurrentToBestMutation mutation;
@@ -60,30 +60,29 @@ void DE::Solve(Population& sol, const BProblem& prob, Log& log)
         ffe++;
     }
 
-    size_t l = 0;
     while (true)
     {
         // Adaptive control.
-        //Adaptive(ffe);
+        Adaptive(ffe);
 
         pop[next].clear();
         pop[next].resize(Psize_);
 
         pop[curr].resize(Psize_ * 2);
 
+        //mutation
+        mutation(pop[curr], F_);
+
+        //crossover
+        crossover(pop[curr], CR_);
+
         for (size_t i = 0; i < Psize_; ++i)
         {
-            //mutation
-            mutation(pop[curr], i, F_);
-
-            //crossover
-            crossover(pop[curr][i], pop[curr][Psize_ + i], CR_);
-
             //CH
             ch(pop[curr][Psize_ + i]);
 
             // Re-initialize the infeasible solution.
-            if (!pop[curr][Psize_ + i].Check())
+            while (!pop[curr][Psize_ + i].Check())
             {
                 log++;
                 initialization(pop[curr][Psize_ + i], prob);
@@ -96,17 +95,11 @@ void DE::Solve(Population& sol, const BProblem& prob, Log& log)
 
         }
         //selection
-        size_t frontSize = envSelection(pop[next], pop[curr]);
+        envSelection(pop[next], pop[curr]);
 
         //print objectives
         log.All(pop[next]);
-        log.Front(pop[next]);
-
-        if (l % 20 == 0)
-        {
-            //log.Detail(pop[next]);
-        }
-        l++;
+        log.Detail(pop[next]);
 
         swap(pop[curr], pop[next]);
 
@@ -116,14 +109,23 @@ void DE::Solve(Population& sol, const BProblem& prob, Log& log)
         }
 
         // Diversity control.
-        /*size_t start = frontSize < Psize_ ? frontSize : frontSize - frontSize / 10;
-        for (size_t i = start; i < Psize_; ++i)
-        {
-            diversity(pop[curr][i], 1.0 / double(prob.numVariables()));
-            ch(pop[curr][i]);
-            prob.Evaluate(pop[curr][i]);
-            ffe++;
-        }*/
+        //size_t start = 0;
+        //for (size_t i = start; i < Psize_; ++i)
+        //{
+        //    diversity(pop[curr][i], 1.0 / double(prob.numVariables()));
+        //    ch(pop[curr][i]);
+
+        //    while (!pop[curr][i].Check())
+        //    {
+        //        log++;
+        //        initialization(pop[curr][i], prob);
+        //        ch(pop[curr][i]);
+        //        ffe++;
+        //    }
+
+        //    prob.Evaluate(pop[curr][i]);
+        //    ffe++;
+        //}
     }
 
     sol = pop[curr];

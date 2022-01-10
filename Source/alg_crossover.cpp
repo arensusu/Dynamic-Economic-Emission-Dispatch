@@ -4,6 +4,7 @@
 
 #include "alg_crossover.h"
 #include "individual.h"
+#include "population.h"
 
 using namespace std;
 
@@ -26,6 +27,22 @@ void BinaryCrossover::operator()(const Individual& target, Individual& mutant, c
             mutant[i] = target[i];
         }
     }
+}
 
-    return;
+void BinaryCrossover::operator()(Population& pop) const
+{
+    size_t Psize = pop.size() / 2;
+    for (size_t i = 0; i < Psize; ++i)
+    {
+        (*this)(pop[i], pop[Psize + i], pop[i].CR());
+    }
+}
+
+void BinaryCrossover::operator()(Population& pop, const double CR) const
+{
+    size_t Psize = pop.size() / 2;
+    for (size_t i = 0; i < Psize; ++i)
+    {
+        (*this)(pop[i], pop[Psize + i], CR);
+    }
 }

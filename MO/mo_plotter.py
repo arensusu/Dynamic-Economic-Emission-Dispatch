@@ -5,7 +5,7 @@ from copy import deepcopy
 
 
 # 動畫參數
-StepSize = 1   # 每隔幾代繪製一次
+StepSize = 5   # 每隔幾代繪製一次
 PauseTime = 0.5 # 暫停秒數
 FigWidth = 16   # 圖表寬
 FigHeight = 10  # 圖表高
@@ -61,11 +61,12 @@ def ProcessFile(infname, rffname):
                     f2_line_chart.DrawObjLineChart(f2_ax)
 
                     IGDv = CalcIGD(rfront, pop)
+                    print(IGDv)
                     IGD_line_chart.AddMetric(gen, IGDv)
                     IGD_line_chart.DrawMetricLineChart(IGD_ax)
 
                     DrawHeatMap(fig, hmap_ax, pop, lb=0, ub=500)
-                    DrawScatterPlot(scat_ax, pop, (120000, 165000), (170000, 500000))
+                    DrawScatterPlot(scat_ax, pop, (2450000, 2800000), (290000, 350000))
                     
                     if AnimationMode:
                         plt.pause(PauseTime)

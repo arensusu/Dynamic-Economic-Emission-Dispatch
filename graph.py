@@ -4,16 +4,16 @@ import os
 
 INDEX = 2
 
-x = [[40000, 60000], [2500000, 2800000], [650000, 750000]]
-y = [[15000, 30000], [300000, 350000], [300000, 500000]]
+x = [[40000, 60000], [2450000, 2800000], [650000, 750000]]
+y = [[15000, 30000], [290000, 350000], [300000, 500000]]
 
-probList = ["5_24_WOB", "10_24_WOB", "15_24_WOB", "30_24_N", "40_24_N"]
+probList = ["5_24_WOB", "10_24_WOB", "15_24_WOB", "40_24_N"]
 
 pname = './Output/'
 
 for prob in probList :
   try :
-    data = open(pname + prob + '/0.trend', 'r')
+    data = open(pname + prob + '/0.igd', 'r')
   except IOError :
     continue
   
@@ -27,11 +27,9 @@ for prob in probList :
   #costs = []
   #emissions = []
 
-  i = 0
   for line in data.readlines() :
-    if i % 3 == 2 :
-      lis = line.strip('\n').split(' ')
-      igd += [float(lis[2])]
+    lis = line.strip('\n')
+    igd += [float(lis)]
 
     """
     else :
@@ -60,9 +58,7 @@ for prob in probList :
       costs.clear()
     """
 
-    i += 1
-
-  plt.plot(np.array(igd[200:]))
+  plt.plot(np.array(igd[:]))
   plt.xlabel('Iteration')
   plt.ylabel('IGD')
 

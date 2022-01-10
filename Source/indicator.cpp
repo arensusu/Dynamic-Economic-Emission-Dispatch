@@ -34,20 +34,66 @@ double IGD::operator()(const Population& pop)
         return 1;
     }
 
-    double Cmin = min(refs_[0][0], pop[0].objs()[0]);
-    double Cmax = max(refs_[refs_.size() - 1][0], pop[pop.size() - 1].objs()[0]);
-    double Emin = min(refs_[refs_.size() - 1][1], pop[pop.size() - 1].objs()[1]);
-    double Emax = max(refs_[0][1], pop[0].objs()[1]);
+    vector<vector<double>> approx(pop.size(), vector<double>(2));
+    for (size_t i = 0; i < pop.size(); ++i)
+    {
+        approx[i][0] = pop[i].objs()[0];
+        approx[i][1] = pop[i].objs()[1];
+    }
 
+    double Cmin = refs_[0][0];
+    double Cmax = refs_[refs_.size() - 1][0];
+    double Emin = refs_[refs_.size() - 1][1];
+    double Emax = refs_[0][1];
+
+    for (size_t i = 0; i < approx.size(); ++i)
+    {
+        double cost = approx[i][0];
+        double emission = approx[i][1];
+
+        if (cost < Cmin)
+        {
+            Cmin = cost;
+        }
+
+        if (cost > Cmax)
+        {
+            Cmax = cost;
+        }
+
+        if (emission < Emin)
+        {
+            Emin = emission;
+        }
+
+        if (emission > Emax)
+        {
+            Emax = emission;
+        }
+    }
+
+    for (size_t i = 0; i < pop.size(); ++i)
+    {
+        approx[i][0] = (approx[i][0] - Cmin) / (Cmax - Cmin);
+        approx[i][1] = (approx[i][1] - Emin) / (Emax - Emin);
+    }
+
+    vector<vector<double>> rf(refs_.size(), vector<double>(2));
     for (size_t i = 0; i < refs_.size(); ++i)
+    {
+        rf[i][0] = (refs_[i][0] - Cmin) / (Cmax - Cmin);
+        rf[i][1] = (refs_[i][1] - Emin) / (Emax - Emin);
+    }
+
+    for (size_t i = 0; i < rf.size(); ++i)
     {        
         double min = numeric_limits<double>::max();
-        for (size_t j = 0; j < pop.size(); ++j)
+        for (size_t j = 0; j < approx.size(); ++j)
         {
-            double Cdiff = (pop[j].objs()[0] - refs_[i][0]) / (Cmax - Cmin);
-            double Ediff = (pop[j].objs()[1] - refs_[i][1]) / (Emax - Emin);
+            double Cdiff = (approx[j][0] - rf[i][0]);
+            double Ediff = (approx[j][1] - rf[i][1]);
             
-            double dis = sqrt(pow(Cdiff, 2) + pow(Cdiff, 2));
+            double dis = sqrt(pow(Cdiff, 2) + pow(Ediff, 2));
 
             if (dis < min)
             {
@@ -58,7 +104,7 @@ double IGD::operator()(const Population& pop)
         igd += min;
     }
 
-    val_ = igd / pop.size();
+    val_ = igd / refs_.size();
 
     return val_;
 }

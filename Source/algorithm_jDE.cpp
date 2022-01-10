@@ -39,8 +39,8 @@ bool JDE::Setup(ifstream& file)
 void JDE::Solve(Population& sol, const BProblem& prob, Log& log)
 {
     //DivisionCH ch;
-    ProportionDivisionCH ch;
-    //FineTuningCH ch;
+    //ProportionDivisionCH ch;
+    FineTuningCH ch;
     RandomInitialization initialization;
     //BestOneMutation mutation;
     //CurrentToBestMutation mutation;
@@ -65,7 +65,6 @@ void JDE::Solve(Population& sol, const BProblem& prob, Log& log)
         ffe++;
     }
 
-    size_t l = 0;
     while (true)
     {
         pop[next].clear();
@@ -73,44 +72,41 @@ void JDE::Solve(Population& sol, const BProblem& prob, Log& log)
 
         pop[curr].resize(Psize_ * 2);
 
+        //mutation
+        mutation(pop[curr]);
+
+        //crossover
+        crossover(pop[curr]);
+
+        // Self-adaptive.
+        SelfAdaptive(pop[curr]);
+
         for (size_t i = 0; i < Psize_; ++i)
         {
-            //mutation
-            mutation(pop[curr], i, pop[curr][i].F());
-
-            //crossover
-            crossover(pop[curr][i], pop[curr][Psize_ + i], pop[curr][i].CR());
-
-            // Self-adaptive.
-            SelfAdaptive(pop[curr][i], pop[curr][Psize_ + i]);
-
             //CH
             ch(pop[curr][Psize_ + i]);
 
             // Re-initialize the infeasible solution.
-            if (!pop[curr][Psize_ + i].Check())
+            while (!pop[curr][Psize_ + i].Check())
             {
                 log++;
                 initialization(pop[curr][Psize_ + i], prob);
                 ch(pop[curr][Psize_ + i]);
+                SelfInitialization(pop[curr][Psize_ + i]);
                 ffe++;
             }
+
             prob.Evaluate(pop[curr][Psize_ + i]);
             ffe++;
 
         }
+
         //selection
-        size_t frontSize = envSelection(pop[next], pop[curr]);
+        envSelection(pop[next], pop[curr]);
 
         //print objectives
         log.All(pop[next]);
-        log.Front(pop[next]);
-
-        if (l % 20 == 0)
-        {
-            //log.Detail(pop[next]);
-        }
-        l++;
+        log.Detail(pop[next]);
 
         swap(pop[curr], pop[next]);
 
@@ -120,14 +116,23 @@ void JDE::Solve(Population& sol, const BProblem& prob, Log& log)
         }
 
         // Diversity control.
-        size_t start = frontSize < Psize_ ? frontSize : frontSize - frontSize / 10;
-        for (size_t i = start; i < Psize_; ++i)
-        {
-            diversity(pop[curr][i], 1.0 / double(prob.numVariables()));
-            ch(pop[curr][i]);
-            prob.Evaluate(pop[curr][i]);
-            ffe++;
-        }
+        //for (size_t i = Psize_ - Psize_ / 10; i < Psize_; ++i)
+        //{
+        //    diversity(pop[curr][i], 1.0 / double(prob.numVariables()));
+        //    ch(pop[curr][i]);
+
+        //    while (!pop[curr][i].Check())
+        //    {
+        //        log++;
+        //        initialization(pop[curr][i], prob);
+        //        ch(pop[curr][i]);
+        //        SelfInitialization(pop[curr][i]);
+        //        ffe++;
+        //    }
+
+        //    prob.Evaluate(pop[curr][i]);
+        //    ffe++;
+        //}
     }
 
     sol = pop[curr];
@@ -136,19 +141,21 @@ void JDE::Solve(Population& sol, const BProblem& prob, Log& log)
     return;
 }
 
-void JDE::SelfInitialization(Population& pop)
+void JDE::SelfInitialization(Population& pop) const
 {
-    default_random_engine gen(chrono::system_clock::now().time_since_epoch().count());
-    uniform_real_distribution<double> dis(0.0, 1.0);
-
     for (size_t i = 0; i < pop.size(); ++i)
     {
-        pop[i].F() = dis(gen);
-        pop[i].CR() = dis(gen);
+        SelfInitialization(pop[i]);
     }
 }
 
-void JDE::SelfAdaptive(const Individual& parent, Individual& offspring)
+void JDE::SelfInitialization(Individual& ind) const
+{
+    ind.F() = 0.5;
+    ind.CR() = 0.5;
+}
+
+void JDE::SelfAdaptive(const Individual& parent, Individual& offspring) const
 {
     default_random_engine gen(chrono::system_clock::now().time_since_epoch().count());
     uniform_real_distribution<double> dis(0.0, 1.0);
@@ -169,5 +176,13 @@ void JDE::SelfAdaptive(const Individual& parent, Individual& offspring)
     else
     {
         offspring.CR() = parent.CR();
+    }
+}
+
+void JDE::SelfAdaptive(Population& pop) const
+{
+    for (size_t i = 0; i < Psize_; ++i)
+    {
+        this->SelfAdaptive(pop[i], pop[Psize_ + i]);
     }
 }

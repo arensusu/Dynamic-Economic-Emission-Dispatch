@@ -15,9 +15,11 @@ public:
 
     virtual void Solve(Population& sol, const BProblem& prob, Log& log);
 
-    void SelfInitialization(Population& pop);
+    void SelfInitialization(Population& pop) const;
+    void SelfInitialization(Individual& ind) const;
 
-    void SelfAdaptive(const Individual& parent, Individual& offspring);
+    void SelfAdaptive(Population& pop) const;
+    void SelfAdaptive(const Individual& parent, Individual& offspring) const;
 
 private:
     int maxffe_;

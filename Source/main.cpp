@@ -81,7 +81,7 @@ int main()
 
     
     //BProblem* prob = nullptr;
-    //SetProblemType(&prob, "10_24_WOB");
+    //SetProblemType(&prob, "15_24_WOB");
     //TestEvaluated(prob);
     
     for (size_t i = 0; i < probList.size(); ++i)

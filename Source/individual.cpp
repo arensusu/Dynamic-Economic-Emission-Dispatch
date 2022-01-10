@@ -184,10 +184,10 @@ ostream& operator<<(ostream& os, const Individual& ind)
         os << " " << powers[i];
     }
 
-    if (ind.F() != -1 && ind.CR() != -1)
-    {
-        os << " " << ind.F() << " " << ind.CR();
-    }
+    //if (ind.F() != -1 || ind.CR() != -1)
+    //{
+    //    os << " " << ind.F() << " " << ind.CR();
+    //}
 
     os << endl;
 

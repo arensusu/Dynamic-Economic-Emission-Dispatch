@@ -20,8 +20,8 @@ public:
 
 private:
     int maxffe_;
-    double Fmin_ = 0.2, Fmax_ = 0.8;
-    double CRmin_ = 0.2, CRmax_ = 0.8;
+    double Fmin_ = 0.1, Fmax_ = 0.9;
+    double CRmin_ = 0.1, CRmax_ = 0.9;
     size_t Psize_;
     double F_;
     double CR_;
