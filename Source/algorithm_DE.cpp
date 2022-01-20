@@ -1,5 +1,7 @@
 
 #include <fstream>
+#include <random>
+#include <chrono>
 
 #include "algorithm_DE.h"
 #include "population.h"
@@ -13,7 +15,7 @@
 #include "alg_env_selection.h"
 #include "alg_diversity.h"
 #include "alg_sorting.h"
-
+#include "localsearch.h"
 #include "log.h"
 
 #include <algorithm>
@@ -32,19 +34,28 @@ bool DE::Setup(ifstream& file)
     return true;
 }
 
-void DE::Solve(Population& sol, const BProblem& prob, Log& log)
+void DE::NSGAII(Population& sol, const BProblem& prob, Log& log)
 {
     ProportionDivisionCH ch;
     //DivisionCH ch;
     //FineTuningCH ch;
+
     RandomInitialization initialization;
+
     //BestOneMutation mutation;
     //CurrentToBestMutation mutation;
-    RandOneMutation mutation;
+    //RandOneMutation mutation;
     //PolynToCurMutation mutation;
+    
     BinaryCrossover crossover;
+    
     BasicEnvSelection envSelection;
+    //OneDimEnvSelection envSelection;
+    //GreedyEnvSelection envSelection;
+
     PolynamialMutation diversity;
+
+    OneDimLS ls;
 
     Population pop[2] = { Population(Psize_) };
     size_t curr = 0, next = 1;
@@ -63,7 +74,7 @@ void DE::Solve(Population& sol, const BProblem& prob, Log& log)
     while (true)
     {
         // Adaptive control.
-        Adaptive(ffe);
+        //Adaptive(ffe);
 
         pop[next].clear();
         pop[next].resize(Psize_);
@@ -71,7 +82,16 @@ void DE::Solve(Population& sol, const BProblem& prob, Log& log)
         pop[curr].resize(Psize_ * 2);
 
         //mutation
-        mutation(pop[curr], F_);
+        //if (ffe < maxffe_ / 2)
+        //{
+        //    BestOneMutation mutation;
+        //    mutation(pop[curr], F_);
+        //}
+        //else
+        {
+            RandOneMutation mutation;
+            mutation(pop[curr], F_);
+        }
 
         //crossover
         crossover(pop[curr], CR_);
@@ -80,22 +100,15 @@ void DE::Solve(Population& sol, const BProblem& prob, Log& log)
         {
             //CH
             ch(pop[curr][Psize_ + i]);
-
-            // Re-initialize the infeasible solution.
-            while (!pop[curr][Psize_ + i].Check())
-            {
-                log++;
-                initialization(pop[curr][Psize_ + i], prob);
-                ch(pop[curr][Psize_ + i]);
-                ffe++;
-            }
-
             prob.Evaluate(pop[curr][Psize_ + i]);
             ffe++;
 
         }
         //selection
         envSelection(pop[next], pop[curr]);
+
+        //ffe += ls(pop[next]);
+
 
         //print objectives
         log.All(pop[next]);
@@ -109,29 +122,196 @@ void DE::Solve(Population& sol, const BProblem& prob, Log& log)
         }
 
         // Diversity control.
-        //size_t start = 0;
-        //for (size_t i = start; i < Psize_; ++i)
+        //for (size_t i = 0; i < Psize_; ++i)
         //{
-        //    diversity(pop[curr][i], 1.0 / double(prob.numVariables()));
-        //    ch(pop[curr][i]);
-
-        //    while (!pop[curr][i].Check())
+        //    if (diversity(pop[curr][i], 1.0 / double(prob.numVariables())))
         //    {
-        //        log++;
-        //        initialization(pop[curr][i], prob);
         //        ch(pop[curr][i]);
+        //        prob.Evaluate(pop[curr][i]);
         //        ffe++;
         //    }
-
-        //    prob.Evaluate(pop[curr][i]);
-        //    ffe++;
         //}
     }
 
     sol = pop[curr];
     log.RecordIGD();
+}
+
+void FitnessAssignment(Population& arch, Population& pop)
+{
+    size_t totalSize = arch.size() + pop.size();
+
+    vector<size_t> strength(totalSize, 0);
+    vector<vector<size_t>> dominatedBy(totalSize);
+    vector<vector<double>> distance(totalSize, vector<double>(totalSize));
+
+    for (size_t i = 0; i < totalSize; ++i)
+    {
+        Individual* curr;
+        if (i < arch.size())
+        {
+            curr = &(arch[i]);
+        }
+        else
+        {
+            curr = &(pop[i - arch.size()]);
+        }
+
+        for (size_t j = 0; j < totalSize; ++j)
+        {
+            Individual* other;
+            if (i != j)
+            {
+                if (j < arch.size())
+                {
+                    other = &(arch[j]);
+                }
+                else
+                {
+                    other = &(pop[j - arch.size()]);
+                }
+
+                if (FeasibleDominated(*curr, *other))
+                {
+                    strength[i]++;
+                }
+
+                if (FeasibleDominated(*other, *curr))
+                {
+                    dominatedBy[i].push_back(j);
+                }
+            }
+            else
+            {
+                other = curr;
+            }
+
+            distance[i][j] = sqrt(pow((curr->objs()[0] - other->objs()[0]), 2) + pow((curr->objs()[1] - other->objs()[1]), 2));
+        }
+    }
+
+    size_t k = sqrt(totalSize);
+
+    for (size_t i = 0; i < totalSize; ++i)
+    {
+        Individual* curr;
+        if (i < arch.size())
+        {
+            curr = &(arch[i]);
+        }
+        else
+        {
+            curr = &(pop[i - arch.size()]);
+        }
+        
+        vector<double> list(totalSize);
+        for (size_t j = 0; j < totalSize; ++j)
+        {
+            list[j] = distance[i][j];
+        }
+        sort(list.begin(), list.end());
+
+        curr->fitness() = 1.0 / (list[k] + 2);
+
+        for (size_t j = 0; j < dominatedBy[i].size(); ++j)
+        {
+            curr->fitness() += strength[dominatedBy[i][j]];
+        }
+    }
+}
+
+Population MatingSelection(const Population& arch, const Population& pop)
+{
+    size_t totalSize = arch.size() + pop.size();
     
-    return;
+    vector<size_t> index(totalSize);
+    for (size_t i = 0; i < totalSize; ++i)
+    {
+        index[i] = i;
+    }
+
+    shuffle(index.begin(), index.end(), default_random_engine(chrono::system_clock::now().time_since_epoch().count()));
+
+    Population chosen(pop.size());
+    for (size_t i = 0; i < chosen.size(); ++i)
+    {
+        const Individual* ind;
+        if (index[i] < arch.size())
+        {
+            ind = &(arch[index[i]]);
+        }
+        else
+        {
+            ind = &(pop[index[i] - arch.size()]);
+        }
+
+        chosen[i] = *ind;
+    }
+
+    return chosen;
+}
+
+void DE::SPEA2(Population& sol, const BProblem& prob, Log& log)
+{
+    ProportionDivisionCH ch;
+
+    RandomInitialization initialize;
+
+    //RandOneMutation mutate;
+    BestOneMutation mutate;
+
+    BinaryCrossover crossover;
+
+    SPEA2EnvSelection envSelect;
+
+    Population pop(Psize_);
+    Population archive;
+
+    int ffe = 0;
+
+    // Initialization.
+    initialize(pop, prob);
+
+    while (true)
+    {
+        for (size_t i = 0; i < Psize_; ++i)
+        {
+            ch(pop[i]);
+            prob.Evaluate(pop[i]);
+            ffe++;
+        }
+
+        if (ffe >= maxffe_)
+        {
+            break;
+        }
+
+        // Fitness assignment.
+        FitnessAssignment(archive, pop);
+
+        archive.resize(100);
+        // Environment selection.
+        archive = envSelect(archive, pop);
+
+        // Mating selection.
+        Population parents = MatingSelection(archive, pop);
+
+        parents.resize(Psize_ * 2);
+        // Reproduction.
+        mutate(parents, F_);
+        crossover(parents, CR_);
+
+        for (size_t i = 0; i < Psize_; ++i)
+        {
+            pop[i] = parents[Psize_ + i];
+        }
+
+        log.All(archive);
+        log.Detail(archive);
+    }
+
+    sol = pop;
+    log.RecordIGD();
 }
 
 void DE::Adaptive(const int ffe)

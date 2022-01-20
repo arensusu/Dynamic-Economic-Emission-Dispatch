@@ -11,7 +11,11 @@ public:
 
     virtual bool Setup(std::ifstream& file);
 
-    virtual void Solve (Population& sol, const BProblem& prob, Log& log);
+    virtual void Solve(Population& sol, const BProblem& prob, Log& log) { NSGAII(sol, prob, log); }
+
+    virtual void NSGAII(Population& sol, const BProblem& prob, Log& log);
+
+    virtual void SPEA2(Population& sol, const BProblem& prob, Log& log);
 
     double& F() { return F_; }
     double& CR() { return CR_; }

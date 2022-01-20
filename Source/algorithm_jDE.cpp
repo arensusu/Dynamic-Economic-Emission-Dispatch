@@ -39,15 +39,19 @@ bool JDE::Setup(ifstream& file)
 void JDE::Solve(Population& sol, const BProblem& prob, Log& log)
 {
     //DivisionCH ch;
-    //ProportionDivisionCH ch;
-    FineTuningCH ch;
+    ProportionDivisionCH ch;
+    //FineTuningCH ch;
+
     RandomInitialization initialization;
-    //BestOneMutation mutation;
+
+    BestOneMutation mutation;
     //CurrentToBestMutation mutation;
-    RandOneMutation mutation;
-    //PolynToCurMutation mutation;
+    //RandOneMutation mutation;
+
     BinaryCrossover crossover;
+
     BasicEnvSelection envSelection;
+
     PolynamialMutation diversity;
 
     Population pop[2] = { Population(Psize_) };
@@ -85,17 +89,6 @@ void JDE::Solve(Population& sol, const BProblem& prob, Log& log)
         {
             //CH
             ch(pop[curr][Psize_ + i]);
-
-            // Re-initialize the infeasible solution.
-            while (!pop[curr][Psize_ + i].Check())
-            {
-                log++;
-                initialization(pop[curr][Psize_ + i], prob);
-                ch(pop[curr][Psize_ + i]);
-                SelfInitialization(pop[curr][Psize_ + i]);
-                ffe++;
-            }
-
             prob.Evaluate(pop[curr][Psize_ + i]);
             ffe++;
 
@@ -116,22 +109,14 @@ void JDE::Solve(Population& sol, const BProblem& prob, Log& log)
         }
 
         // Diversity control.
-        //for (size_t i = Psize_ - Psize_ / 10; i < Psize_; ++i)
+        //for (size_t i = Psize_ - Psize_ / 1; i < Psize_; ++i)
         //{
-        //    diversity(pop[curr][i], 1.0 / double(prob.numVariables()));
-        //    ch(pop[curr][i]);
-
-        //    while (!pop[curr][i].Check())
+        //    if (diversity(pop[curr][i], 1.0 / double(prob.numVariables()), double(prob.numVariables())))
         //    {
-        //        log++;
-        //        initialization(pop[curr][i], prob);
         //        ch(pop[curr][i]);
-        //        SelfInitialization(pop[curr][i]);
+        //        prob.Evaluate(pop[curr][i]);
         //        ffe++;
         //    }
-
-        //    prob.Evaluate(pop[curr][i]);
-        //    ffe++;
         //}
     }
 

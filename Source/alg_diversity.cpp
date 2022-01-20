@@ -8,7 +8,7 @@
 
 using namespace std;
 
-void PolynamialMutation::operator()(Individual& ind, const double pm, const double eta) const
+bool PolynamialMutation::operator()(Individual& ind, const double pm, const double eta) const
 {
     // Parameters.
     size_t numVariables = Individual::prob().numVariables();
@@ -18,10 +18,13 @@ void PolynamialMutation::operator()(Individual& ind, const double pm, const doub
     uniform_real_distribution<double> dis(0.0, 1.0);
 
     // Mutation.
+    bool perturb = false;
     for (size_t i = 0; i < numVariables; ++i)
     {
         if (dis(gen) < pm)
         {
+            perturb = true;
+
             double delta;
 
             double r1 = dis(gen);
@@ -36,8 +39,10 @@ void PolynamialMutation::operator()(Individual& ind, const double pm, const doub
                 delta = 1.0 - pow((2.0 * (1 - r1)), (1.0 / (eta + 1.0)));
             }
 
-            ind.encoding()[i] += + delta * 1.0;
+            ind.encoding()[i] += delta * 1.0;
         }
     }
+
+    return perturb;
 }
 

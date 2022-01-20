@@ -56,36 +56,80 @@ void RandOneMutation::operator()(Population& pop) const
     }
 }
 
-void BestOneMutation::operator() (Population& pop, const size_t pos, const double F) const
+void BestOneMutation::operator() (Population& pop, const double F) const
 {
     // Parameters.
     size_t numVariables = Individual::prob().numVariables();
     size_t Psize = pop.size() / 2;
 
-    // Get random individuals.
-    vector<int> index(Psize);
-    for (size_t i = 0; i < Psize; ++i)
+    Population parent(pop.begin(), pop.begin() + Psize);
+    vector<vector<size_t>> fronts = NondominatedSort(parent);
+
+    default_random_engine gen(chrono::system_clock::now().time_since_epoch().count());
+    uniform_int_distribution<size_t> dis(0, fronts[0].size() - 1);
+
+    for (size_t pos = 0; pos < Psize; ++pos)
     {
-        index[i] = i;
+        // Get random individuals.
+        vector<int> index(Psize);
+        for (size_t i = 0; i < Psize; ++i)
+        {
+            index[i] = i;
+        }
+        shuffle(index.begin(), index.end(), gen);
+
+        const Individual& r2 = pop[index[0]];
+        const Individual& r3 = pop[index[1]];
+
+        // Get best individual.
+        const Individual& best = pop[fronts[0][dis(gen)]];
+
+        // Create mutant vector.
+        const Individual& curr = pop[pos];
+        Individual& mutant = pop[Psize + pos];
+        for (size_t i = 0; i < Individual::prob().numVariables(); ++i)
+        {
+            mutant[i] = best[i] + F * (r2[i] - r3[i]);
+        }
     }
+}
 
-    shuffle(index.begin(), index.end(), default_random_engine(chrono::system_clock::now().time_since_epoch().count()));
+void BestOneMutation::operator() (Population& pop) const
+{
+    // Parameters.
+    size_t numVariables = Individual::prob().numVariables();
+    size_t Psize = pop.size() / 2;
 
-    const Individual& r2 = pop[index[0]];
-    const Individual& r3 = pop[index[1]];
+    Population parent(pop.begin(), pop.begin() + Psize);
+    vector<vector<size_t>> fronts = NondominatedSort(parent);
 
-    // Get best(compromise) individual.
-    Compromise comp;
-    const Individual& best = pop[comp(pop)];
+    default_random_engine gen(chrono::system_clock::now().time_since_epoch().count());
+    uniform_int_distribution<size_t> dis(0, fronts[0].size() - 1);
 
-    // Create mutant vector.
-    Individual& mutant = pop[Psize + pos];
-    for (size_t i = 0; i < Individual::prob().numVariables(); ++i)
+    for (size_t pos = 0; pos < Psize; ++pos)
     {
-        mutant[i] = best[i] + F * (r2[i] - r3[i]);
-    }
+        // Get random individuals.
+        vector<int> index(Psize);
+        for (size_t i = 0; i < Psize; ++i)
+        {
+            index[i] = i;
+        }
+        shuffle(index.begin(), index.end(), gen);
 
-    return;
+        const Individual& r2 = pop[index[0]];
+        const Individual& r3 = pop[index[1]];
+
+        // Get best individual.
+        const Individual& best = pop[fronts[0][dis(gen)]];
+
+        // Create mutant vector.
+        const Individual& curr = pop[pos];
+        Individual& mutant = pop[Psize + pos];
+        for (size_t i = 0; i < Individual::prob().numVariables(); ++i)
+        {
+            mutant[i] = best[i] + curr.F() * (r2[i] - r3[i]);
+        }
+    }
 }
 
 void CurrentToBestMutation::operator()(Population& pop, const double F) const
@@ -100,7 +144,7 @@ void CurrentToBestMutation::operator()(Population& pop, const double F) const
     default_random_engine gen(chrono::system_clock::now().time_since_epoch().count());
     uniform_int_distribution<size_t> dis(0, fronts[0].size() - 1);
 
-    for (size_t pos = 0; pos < pop.size(); ++pos)
+    for (size_t pos = 0; pos < Psize; ++pos)
     {
         // Get random individuals.
         vector<int> index(Psize);
@@ -138,7 +182,7 @@ void CurrentToBestMutation::operator()(Population& pop) const
     default_random_engine gen(chrono::system_clock::now().time_since_epoch().count());
     uniform_int_distribution<size_t> dis(0, fronts[0].size() - 1);
 
-    for (size_t pos = 0; pos < pop.size(); ++pos)
+    for (size_t pos = 0; pos < Psize; ++pos)
     {
         // Get random individuals.
         vector<int> index(Psize);
@@ -153,6 +197,8 @@ void CurrentToBestMutation::operator()(Population& pop) const
 
         // Get best individual.
         const Individual& best = pop[fronts[0][dis(gen)]];
+        //Compromise comp;
+        //const Individual& best = pop[comp(pop)];
 
         // Create mutant vector.
         const Individual& curr = pop[pos];

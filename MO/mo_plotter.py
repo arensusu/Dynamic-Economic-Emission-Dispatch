@@ -61,12 +61,11 @@ def ProcessFile(infname, rffname):
                     f2_line_chart.DrawObjLineChart(f2_ax)
 
                     IGDv = CalcIGD(rfront, pop)
-                    print(IGDv)
                     IGD_line_chart.AddMetric(gen, IGDv)
                     IGD_line_chart.DrawMetricLineChart(IGD_ax)
 
                     DrawHeatMap(fig, hmap_ax, pop, lb=0, ub=500)
-                    DrawScatterPlot(scat_ax, pop, (2450000, 2800000), (290000, 350000))
+                    DrawScatterPlot(scat_ax, pop, (2450000, 3000000), (290000, 400000))
                     
                     if AnimationMode:
                         plt.pause(PauseTime)

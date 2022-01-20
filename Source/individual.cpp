@@ -147,7 +147,7 @@ const vector<double> Individual::PowerOutput() const
 }
 
 // Check with the threshold.
-bool Individual::Check(const double threshold) const
+bool Individual::Check(const double threshold)
 {
     // Parameters.
     size_t numPeriods = problem_->numPeriods();
@@ -166,6 +166,8 @@ bool Individual::Check(const double threshold) const
             break;
         }
     }
+
+    feasible_ = isFeasible;
 
     return isFeasible;
 }

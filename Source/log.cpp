@@ -126,7 +126,12 @@ void Log::Average(const Population& pop)
     all << "Compromise : " << paretoSet[index].objs()[0] << ", " << paretoSet[index].objs()[1] << endl;
     all << "Best-Emission : " << paretoSet[paretoSet.size() - 1].objs()[0] << ", " << paretoSet[paretoSet.size() - 1].objs()[1] << endl << endl;
 
-    all << "Infeasible time : " << infeasibleTime_ << endl;
+    all << "Feasible : " ;
+    for (size_t i = 0; i < paretoSet.size(); ++i)
+    {
+        all << paretoSet[i].feasible();
+    }
+    all << endl;
 
     for (size_t i = 0; i < paretoSet.size(); ++i)
     {

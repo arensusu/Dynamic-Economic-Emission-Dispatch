@@ -110,5 +110,6 @@ bool NProblem::Evaluate(vector<double>& objs, const vector<double>& powers) cons
 
 bool NProblem::Evaluate(Individual& ind) const
 {
+    ind.Check();
     return Evaluate(ind.objs(), ind.Decoder());
 }

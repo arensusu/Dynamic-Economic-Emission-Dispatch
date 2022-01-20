@@ -19,6 +19,9 @@ public:
     const std::vector<double>& objs() const { return objectives_; }
     std::vector<double>& objs() { return objectives_; }
 
+    bool feasible() const { return feasible_; }
+    //bool& feasible() { return feasible_; }
+
     const double operator[](const int i) const { return encoding_[i]; }
     double& operator[](const int i) { return encoding_[i]; }
 
@@ -27,6 +30,9 @@ public:
 
     const double CR() const { return CR_; }
     double& CR() { return CR_; }
+
+    const double fitness() const { return fitness_; }
+    double& fitness() { return fitness_; }
 
     // Normalize to [0, 1].
     void Encoder(const std::size_t t, const std::vector<double>& powers);
@@ -42,7 +48,7 @@ public:
     const std::vector<double> PowerOutput() const;
 
     // Check the individual is feasible or not.
-    bool Check(const double threshold = 0.01) const;
+    bool Check(const double threshold = 0.001);
 
     // Problem of all individuals.
     static void SetProblem(const BProblem& prob) { problem_ = &prob; }
@@ -53,8 +59,12 @@ protected:
     std::vector<double> encoding_;
     std::vector<double> objectives_;
 
+    bool feasible_ = false;
+
     double F_ = -1;
     double CR_ = -1;
+
+    double fitness_ = -1;
 
     static const BProblem* problem_;
 };

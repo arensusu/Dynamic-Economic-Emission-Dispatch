@@ -15,8 +15,8 @@ public:
 class BestOneMutation
 {
 public:
-    //void operator()(Population& pop, const double F) const;
-    void operator()(Population& pop, const std::size_t pos, const double F) const;
+    void operator()(Population& pop) const;
+    void operator()(Population& pop, const double F) const;
 };
 
 class CurrentToBestMutation
