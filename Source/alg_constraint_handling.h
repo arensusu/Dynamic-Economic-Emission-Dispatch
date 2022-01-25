@@ -4,7 +4,12 @@
 class Individual;
 class BProblem;
 
-void InequalityConstraint(std::vector<double>& curr, const std::vector<double>& prev, const BProblem& prob);
+class InequalityCH
+{
+public:
+    void operator()(Individual& ind) const;
+    void operator()(std::vector<double>& curr, const std::vector<double>& prev, const BProblem& prob) const;
+};
 
 class DivisionCH
 {

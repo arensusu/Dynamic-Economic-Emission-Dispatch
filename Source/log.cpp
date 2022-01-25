@@ -33,6 +33,11 @@ Log::Log(const string& name, const size_t run)
 void Log::All(const Population& pop)
 {
     trend_ << igd_(pop) << endl;
+    //for (size_t i = 0; i < pop.size(); ++i)
+    //{
+    //    trend_ << pop[i];
+    //}
+    //trend_ << endl;
 }
 
 void Log::Front(const Population& pop)

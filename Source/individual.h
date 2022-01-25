@@ -25,6 +25,8 @@ public:
     const double operator[](const int i) const { return encoding_[i]; }
     double& operator[](const int i) { return encoding_[i]; }
 
+    bool operator==(const Individual& ind) const { return (this->objs()[0] == ind.objs()[0]) && (this->objs()[1] == ind.objs()[1]); }
+
     const double F() const { return F_; }
     double& F() { return F_; }
 

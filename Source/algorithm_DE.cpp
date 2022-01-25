@@ -34,28 +34,17 @@ bool DE::Setup(ifstream& file)
     return true;
 }
 
-void DE::NSGAII(Population& sol, const BProblem& prob, Log& log)
+void DE::Solve(Population& sol, const BProblem& prob, Log& log)
 {
     ProportionDivisionCH ch;
-    //DivisionCH ch;
-    //FineTuningCH ch;
 
     RandomInitialization initialization;
 
-    //BestOneMutation mutation;
-    //CurrentToBestMutation mutation;
-    //RandOneMutation mutation;
-    //PolynToCurMutation mutation;
+    RandOneMutation mutation;
     
     BinaryCrossover crossover;
     
-    BasicEnvSelection envSelection;
-    //OneDimEnvSelection envSelection;
-    //GreedyEnvSelection envSelection;
-
-    PolynamialMutation diversity;
-
-    OneDimLS ls;
+    OneDimEnvSelection envSelection;
 
     Population pop[2] = { Population(Psize_) };
     size_t curr = 0, next = 1;
@@ -73,27 +62,16 @@ void DE::NSGAII(Population& sol, const BProblem& prob, Log& log)
 
     while (true)
     {
-        // Adaptive control.
-        //Adaptive(ffe);
+        if (ffe >= maxffe_)
+        {
+            break;
+        }
 
         pop[next].clear();
         pop[next].resize(Psize_);
-
         pop[curr].resize(Psize_ * 2);
 
-        //mutation
-        //if (ffe < maxffe_ / 2)
-        //{
-        //    BestOneMutation mutation;
-        //    mutation(pop[curr], F_);
-        //}
-        //else
-        {
-            RandOneMutation mutation;
-            mutation(pop[curr], F_);
-        }
-
-        //crossover
+        mutation(pop[curr], F_);
         crossover(pop[curr], CR_);
 
         for (size_t i = 0; i < Psize_; ++i)
@@ -107,30 +85,11 @@ void DE::NSGAII(Population& sol, const BProblem& prob, Log& log)
         //selection
         envSelection(pop[next], pop[curr]);
 
-        //ffe += ls(pop[next]);
-
-
         //print objectives
         log.All(pop[next]);
         log.Detail(pop[next]);
 
         swap(pop[curr], pop[next]);
-
-        if (ffe >= maxffe_)
-        {
-            break;
-        }
-
-        // Diversity control.
-        //for (size_t i = 0; i < Psize_; ++i)
-        //{
-        //    if (diversity(pop[curr][i], 1.0 / double(prob.numVariables())))
-        //    {
-        //        ch(pop[curr][i]);
-        //        prob.Evaluate(pop[curr][i]);
-        //        ffe++;
-        //    }
-        //}
     }
 
     sol = pop[curr];
@@ -257,8 +216,8 @@ void DE::SPEA2(Population& sol, const BProblem& prob, Log& log)
 
     RandomInitialization initialize;
 
-    //RandOneMutation mutate;
-    BestOneMutation mutate;
+    RandOneMutation mutate;
+    //BestOneMutation mutate;
 
     BinaryCrossover crossover;
 

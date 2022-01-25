@@ -5,6 +5,7 @@
 #include <cmath>
 
 #include "alg_mutation.h"
+#include "alg_mating_selection.h"
 #include "population.h"
 #include "individual.h"
 #include "alg_sorting.h"
@@ -54,6 +55,42 @@ void RandOneMutation::operator()(Population& pop) const
     {
         (*this)(pop, i, pop[i].F());
     }
+}
+
+void RandOneMutation::operator()(Individual& mutant, const Population& rands, const double F) const
+{
+    size_t numVariables = Individual::prob().numVariables();
+
+    for (size_t i = 0; i < numVariables; ++i)
+    {
+        mutant[i] = rands[0][i] + F * (rands[1][i] - rands[2][i]);
+    }
+}
+
+void RandOneMutation::operator()(Population& mutants,
+                                 const Population& parent,
+                                 const vector<vector<size_t>>& neighborhood,
+                                 const double F) const
+{
+    for (size_t i = 0; i < mutants.size(); ++i)
+    {
+        (*this)(mutants[i], parent, neighborhood[i], F);
+    }
+}
+
+void RandOneMutation::operator()(Individual& mutant, const Population& parent, const vector<size_t> neighborhood, const double F) const
+{
+    RandomMatingSelection matingSelect;
+
+    vector<size_t> index = matingSelect(neighborhood, 3);
+
+    Population rands;
+    for (size_t i = 0; i < index.size(); ++i)
+    {
+        rands.push_back(parent[index[i]]);
+    }
+
+    (*this)(mutant, rands, F);
 }
 
 void BestOneMutation::operator() (Population& pop, const double F) const

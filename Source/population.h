@@ -10,6 +10,7 @@ class Population
 public:
     explicit Population(size_t s) : pop_(s) {}
     Population(std::vector<Individual>::const_iterator start, std::vector<Individual>::const_iterator end) : pop_(start, end) {}
+    Population(const Population& p1, const Population& p2) : Population(p1) { this->push_back(p2); }
     Population() {}
     ~Population() {}
 
@@ -27,6 +28,8 @@ public:
     const size_t size() const { return pop_.size(); }
 
     void resize(const int s) { pop_.resize(s); }
+
+    void erase(const size_t index) { pop_.erase(pop_.begin() + index); }
 
     void clear() { pop_.clear(); }
 

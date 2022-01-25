@@ -8,7 +8,7 @@
 
 using namespace std;
 
-void BinaryCrossover::operator()(const Individual& target, Individual& mutant, const double CR) const
+void BinaryCrossover::operator()(Individual& mutant, const Individual& target, const double CR) const
 {
     // Parameters.
     size_t numVariables = Individual::prob().numVariables();
@@ -34,7 +34,7 @@ void BinaryCrossover::operator()(Population& pop) const
     size_t Psize = pop.size() / 2;
     for (size_t i = 0; i < Psize; ++i)
     {
-        (*this)(pop[i], pop[Psize + i], pop[i].CR());
+        (*this)(pop[Psize + i], pop[i], pop[i].CR());
     }
 }
 
@@ -43,6 +43,14 @@ void BinaryCrossover::operator()(Population& pop, const double CR) const
     size_t Psize = pop.size() / 2;
     for (size_t i = 0; i < Psize; ++i)
     {
-        (*this)(pop[i], pop[Psize + i], CR);
+        (*this)(pop[Psize + i], pop[i], CR);
+    }
+}
+
+void BinaryCrossover::operator()(Population& trial, const Population& target, const double CR) const
+{
+    for (size_t i = 0; i < trial.size(); ++i)
+    {
+        (*this)(trial[i], target[i], CR);
     }
 }

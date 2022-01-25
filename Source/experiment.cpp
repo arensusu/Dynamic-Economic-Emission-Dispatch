@@ -5,6 +5,8 @@
 #include "algorithm_base.h"
 #include "algorithm_DE.h"
 #include "algorithm_jDE.h"
+#include "algorithm_MOEAD-DE.h"
+#include "algorithm_NSDE.h"
 
 #include "problem_base.h"
 #include "problem_noloss.h"
@@ -26,6 +28,14 @@ void SetExperiment(BaseEA** ea, vector<string>& probList, ifstream& file)
     else if (algoName == "jDE")
     {
         *ea = new JDE();
+    }
+    else if (algoName == "MOEAD-DE")
+    {
+        *ea = new MOEADDE();
+    }
+    else if (algoName == "NSDE")
+    {
+        *ea = new NSDE();
     }
 
     (*ea)->Setup(file);

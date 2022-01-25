@@ -10,7 +10,26 @@
 
 using namespace std;
 
-void InequalityConstraint(vector<double>& curr, const vector<double>& prev, const BProblem &prob)
+void InequalityCH::operator()(Individual& ind) const
+{
+    size_t numPeriods = Individual::prob().numPeriods();
+
+    vector<double> prev;
+    for (size_t t = 0; t < numPeriods; ++t)
+    {
+        const double demand = Individual::prob().load(t);
+
+        vector<double> power_t = ind.Decoder(t);
+
+        (*this)(power_t, prev, Individual::prob());
+
+        ind.Encoder(t, power_t);
+
+        prev = power_t;
+    }
+}
+
+void InequalityCH::operator()(vector<double>& curr, const vector<double>& prev, const BProblem &prob) const
 {
     for (size_t i = 0; i < curr.size(); ++i)
     {
@@ -133,6 +152,8 @@ void DivisionCH::operator()(Individual& ind, const size_t maxTry, const double t
     size_t numPeriods = Individual::prob().numPeriods();
     size_t numMachines = Individual::prob().numMachines();
 
+    InequalityCH inequal;
+
     double supply;
 
     vector<double> prev;
@@ -142,7 +163,7 @@ void DivisionCH::operator()(Individual& ind, const size_t maxTry, const double t
 
         vector<double> power_t = ind.Decoder(t);
 
-        InequalityConstraint(power_t, prev, Individual::prob());
+        inequal(power_t, prev, Individual::prob());
         supply = Individual::PowerOutput(power_t);
 
         double diff = demand - supply;
@@ -162,7 +183,7 @@ void DivisionCH::operator()(Individual& ind, const size_t maxTry, const double t
                 power_t[j] += div;
             }
 
-            InequalityConstraint(power_t, prev, Individual::prob());
+            inequal(power_t, prev, Individual::prob());
             supply = Individual::PowerOutput(power_t);
 
             diff = demand - supply;
@@ -184,6 +205,8 @@ void FineTuningCH::operator()(Individual& ind, const size_t maxTry, const double
     size_t numPeriods = Individual::prob().numPeriods();
     size_t numMachines = Individual::prob().numMachines();
 
+    InequalityCH inequal;
+
     default_random_engine gen(chrono::system_clock::now().time_since_epoch().count());
     uniform_int_distribution<size_t> dis(0, numMachines - 1);
 
@@ -196,7 +219,7 @@ void FineTuningCH::operator()(Individual& ind, const size_t maxTry, const double
 
         vector<double> power_t = ind.Decoder(t);
 
-        InequalityConstraint(power_t, prev, Individual::prob());
+        inequal(power_t, prev, Individual::prob());
         supply = Individual::PowerOutput(power_t);
 
         double diff = demand - supply;
@@ -213,7 +236,7 @@ void FineTuningCH::operator()(Individual& ind, const size_t maxTry, const double
 
             power_t[j] = power_t[j] + diff;
 
-            InequalityConstraint(power_t, prev, Individual::prob());
+            inequal(power_t, prev, Individual::prob());
             supply = Individual::PowerOutput(power_t);
 
             diff = demand - supply;
@@ -235,6 +258,8 @@ void TFineTuningCH::operator()(Individual& ind, const size_t maxTry, const doubl
     size_t numPeriods = Individual::prob().numPeriods();
     size_t numMachines = Individual::prob().numMachines();
 
+    InequalityCH inequal;
+
     double supply;
 
     vector<double> prev;
@@ -244,7 +269,7 @@ void TFineTuningCH::operator()(Individual& ind, const size_t maxTry, const doubl
 
         vector<double> power_t = ind.Decoder(t);
 
-        InequalityConstraint(power_t, prev, Individual::prob());
+        inequal(power_t, prev, Individual::prob());
         supply = Individual::PowerOutput(power_t);
 
         double diff = demand - supply;
@@ -280,7 +305,7 @@ void TFineTuningCH::operator()(Individual& ind, const size_t maxTry, const doubl
 
             power_t[j] += min(abs(diff), remains[j]) * double(sign);
 
-            InequalityConstraint(power_t, prev, Individual::prob());
+            inequal(power_t, prev, Individual::prob());
             supply = Individual::PowerOutput(power_t);
 
             diff = demand - supply;
@@ -328,6 +353,8 @@ void ProportionDivisionCH::operator()(Individual& ind, const size_t maxTry, cons
     size_t numPeriods = Individual::prob().numPeriods();
     size_t numMachines = Individual::prob().numMachines();
 
+    InequalityCH inequal;
+
     const vector<double> proportion = Proportion(Individual::prob());
 
     double supply;
@@ -339,7 +366,7 @@ void ProportionDivisionCH::operator()(Individual& ind, const size_t maxTry, cons
 
         vector<double> power_t = ind.Decoder(t);
 
-        InequalityConstraint(power_t, prev, Individual::prob());
+        inequal(power_t, prev, Individual::prob());
         supply = Individual::PowerOutput(power_t);
 
         double diff = demand - supply;
@@ -358,7 +385,7 @@ void ProportionDivisionCH::operator()(Individual& ind, const size_t maxTry, cons
                 power_t[j] += diff * proportion[j];
             }
 
-            InequalityConstraint(power_t, prev, Individual::prob());
+            inequal(power_t, prev, Individual::prob());
             supply = Individual::PowerOutput(power_t);
 
             diff = demand - supply;
