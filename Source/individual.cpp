@@ -155,12 +155,16 @@ bool Individual::Check(const double threshold)
     bool isFeasible = true;
 
     // Calculate the gap.
+    violation_ = 0.0;
     for (size_t t = 0; t < numPeriods; ++t)
     {
         const double supply = PowerOutput(t);
         const double demand = problem_->load(t);
 
-        if (abs(supply - demand) > threshold)
+        double diff = abs(supply - demand);
+        violation_ += diff;
+
+        if (diff > threshold)
         {
             isFeasible = false;
             break;

@@ -20,7 +20,9 @@ public:
     std::vector<double>& objs() { return objectives_; }
 
     bool feasible() const { return feasible_; }
-    //bool& feasible() { return feasible_; }
+    
+    const double violation() const { return violation_; }
+    double& violation() { return violation_; }
 
     const double operator[](const int i) const { return encoding_[i]; }
     double& operator[](const int i) { return encoding_[i]; }
@@ -63,9 +65,13 @@ protected:
 
     bool feasible_ = false;
 
+    double violation_ = 0.0;
+
+    // Self-adaptive.
     double F_ = -1;
     double CR_ = -1;
 
+    // SPEA2.
     double fitness_ = -1;
 
     static const BProblem* problem_;

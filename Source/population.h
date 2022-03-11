@@ -23,7 +23,22 @@ public:
     std::vector<Individual>::iterator end() { return pop_.end(); }
 
     void push_back(const Individual& ind) { pop_.push_back(ind); }
-    void push_back(const Population& p) { for (size_t i = 0; i < p.size(); ++i) pop_.push_back(p[i]); }
+    void push_back(const Population& p) 
+    { 
+        for (size_t i = 0; i < p.size(); ++i)
+        {
+            bool same = false;
+            for (size_t j = 0; j < pop_.size(); ++j)
+            {
+                if (p[i] == pop_[j])
+                {
+                    same = true;
+                }
+            }
+
+            if (!same) pop_.push_back(p[i]);
+        }
+    }
 
     const size_t size() const { return pop_.size(); }
 

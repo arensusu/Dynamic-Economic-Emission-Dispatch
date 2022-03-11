@@ -14,19 +14,19 @@ public:
 class DivisionCH
 {
 public:
-    void operator()(Individual& ind, const std::size_t maxTry = 100, const double threshold = 0.00001) const;
+    void operator()(Individual& ind, const std::size_t maxTry = 10, const double threshold = 0.00001) const;
 };
 
 class FineTuningCH
 {
 public:
-    void operator()(Individual& ind, const std::size_t maxTry = 100, const double threshold = 0.00001) const;
+    void operator()(Individual& ind, const std::size_t maxTry = 10, const double threshold = 0.00001) const;
 };
 
 class TFineTuningCH
 {
 public:
-    void operator()(Individual& ind, const std::size_t maxTry = 100, const double threshold = 0.00001) const;
+    void operator()(Individual& ind, const std::size_t maxTry = 10, const double threshold = 0.00001) const;
 };
 
 class ProportionDivisionCH

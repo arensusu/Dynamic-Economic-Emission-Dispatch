@@ -30,7 +30,7 @@ void RandomPermutation(vector<size_t>& order)
 {
     Permutation(order);
 
-    shuffle(order.begin(), order.end(), default_random_engine(chrono::system_clock::now().time_since_epoch().count()));
+    shuffle(order.begin(), order.end(), gen);
 }
 
 double Tchebycheff(const vector<double>& objs, const vector<double>& weights,

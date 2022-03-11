@@ -10,6 +10,8 @@
 #include "problem_base.h"
 #include "indicator.h"
 
+#include "tool.h"
+
 using namespace std;
 
 bool OneDimLS::operator()(Population& pop) const
@@ -19,7 +21,6 @@ bool OneDimLS::operator()(Population& pop) const
 
     vector<vector<size_t>> fronts = NondominatedSort(pop);
 
-    default_random_engine gen(chrono::system_clock::now().time_since_epoch().count());
     uniform_real_distribution<double> dis(0.0, 1.0);
 
     size_t minEcoIndex = fronts[0][0];

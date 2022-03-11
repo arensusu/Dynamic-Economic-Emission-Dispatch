@@ -2,11 +2,12 @@
 #include <limits>
 #include <algorithm>
 #include <random>
-#include <chrono>
 
 #include "alg_constraint_handling.h"
 #include "individual.h"
 #include "problem_base.h"
+
+#include "tool.h"
 
 using namespace std;
 
@@ -128,7 +129,6 @@ size_t RouletteWheel(const vector<double>& remains)
     }
 
     // Random engine.
-    default_random_engine gen(chrono::system_clock::now().time_since_epoch().count());
     uniform_real_distribution<double> dis(0.0, 1.0);
 
     double r1 = dis(gen);
@@ -207,7 +207,6 @@ void FineTuningCH::operator()(Individual& ind, const size_t maxTry, const double
 
     InequalityCH inequal;
 
-    default_random_engine gen(chrono::system_clock::now().time_since_epoch().count());
     uniform_int_distribution<size_t> dis(0, numMachines - 1);
 
     double supply;

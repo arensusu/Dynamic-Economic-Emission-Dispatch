@@ -1,7 +1,6 @@
 
 #include <fstream>
 #include <random>
-#include <chrono>
 
 #include "algorithm_DE.h"
 #include "population.h"
@@ -16,7 +15,9 @@
 #include "alg_diversity.h"
 #include "alg_sorting.h"
 #include "localsearch.h"
+
 #include "log.h"
+#include "tool.h"
 
 #include <algorithm>
 
@@ -189,7 +190,7 @@ Population MatingSelection(const Population& arch, const Population& pop)
         index[i] = i;
     }
 
-    shuffle(index.begin(), index.end(), default_random_engine(chrono::system_clock::now().time_since_epoch().count()));
+    shuffle(index.begin(), index.end(), gen);
 
     Population chosen(pop.size());
     for (size_t i = 0; i < chosen.size(); ++i)

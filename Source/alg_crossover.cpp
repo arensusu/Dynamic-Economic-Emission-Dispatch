@@ -6,6 +6,8 @@
 #include "individual.h"
 #include "population.h"
 
+#include "tool.h"
+
 using namespace std;
 
 void BinaryCrossover::operator()(Individual& mutant, const Individual& target, const double CR) const
@@ -13,7 +15,6 @@ void BinaryCrossover::operator()(Individual& mutant, const Individual& target, c
     // Parameters.
     size_t numVariables = Individual::prob().numVariables();
 
-    default_random_engine gen(chrono::system_clock::now().time_since_epoch().count());
     uniform_real_distribution<double> dis(0.0, 1.0);
 
     for (size_t i = 0; i < numVariables; ++i)

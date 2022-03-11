@@ -2,6 +2,9 @@
 #define TOOL__
 
 #include <vector>
+#include <random>
+
+extern std::default_random_engine gen;
 
 double DistanceNorm2(std::vector<double>& l, std::vector<double>& r);
 

@@ -11,6 +11,8 @@
 #include "alg_sorting.h"
 #include "indicator.h"
 
+#include "tool.h"
+
 using namespace std;
 
 
@@ -27,7 +29,7 @@ void RandOneMutation::operator()(Population& pop, const size_t pos, const double
         index[i] = i;
     }
 
-    shuffle(index.begin(), index.end(), default_random_engine(chrono::system_clock::now().time_since_epoch().count()));
+    shuffle(index.begin(), index.end(), gen);
 
     const Individual& r1 = pop[index[0]];
     const Individual& r2 = pop[index[1]];
@@ -102,7 +104,6 @@ void BestOneMutation::operator() (Population& pop, const double F) const
     Population parent(pop.begin(), pop.begin() + Psize);
     vector<vector<size_t>> fronts = NondominatedSort(parent);
 
-    default_random_engine gen(chrono::system_clock::now().time_since_epoch().count());
     uniform_int_distribution<size_t> dis(0, fronts[0].size() - 1);
 
     for (size_t pos = 0; pos < Psize; ++pos)
@@ -140,7 +141,6 @@ void BestOneMutation::operator() (Population& pop) const
     Population parent(pop.begin(), pop.begin() + Psize);
     vector<vector<size_t>> fronts = NondominatedSort(parent);
 
-    default_random_engine gen(chrono::system_clock::now().time_since_epoch().count());
     uniform_int_distribution<size_t> dis(0, fronts[0].size() - 1);
 
     for (size_t pos = 0; pos < Psize; ++pos)
@@ -178,7 +178,6 @@ void CurrentToBestMutation::operator()(Population& pop, const double F) const
     Population parent(pop.begin(), pop.begin() + Psize);
     vector<vector<size_t>> fronts = NondominatedSort(parent);
 
-    default_random_engine gen(chrono::system_clock::now().time_since_epoch().count());
     uniform_int_distribution<size_t> dis(0, fronts[0].size() - 1);
 
     for (size_t pos = 0; pos < Psize; ++pos)
@@ -216,7 +215,6 @@ void CurrentToBestMutation::operator()(Population& pop) const
     Population parent(pop.begin(), pop.begin() + Psize);
     vector<vector<size_t>> fronts = NondominatedSort(parent);
 
-    default_random_engine gen(chrono::system_clock::now().time_since_epoch().count());
     uniform_int_distribution<size_t> dis(0, fronts[0].size() - 1);
 
     for (size_t pos = 0; pos < Psize; ++pos)

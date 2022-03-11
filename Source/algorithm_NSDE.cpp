@@ -24,7 +24,6 @@ void NSDE::Solve(Population& sol, const BProblem& prob, Log& log)
 
     RandomInitialization initialization;
 
-    //BestOneMutation mutation;
     RandOneMutation mutation;
 
     BinaryCrossover crossover;

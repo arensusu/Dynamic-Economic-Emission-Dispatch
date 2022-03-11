@@ -13,6 +13,7 @@
 #include <ctime>
 #include "individual.h"
 #include "alg_sorting.h"
+#include "tool.h"
 
 using namespace std;
 
@@ -69,6 +70,8 @@ void TestDominated()
     vector<vector<size_t>> front = NondominatedSort(pop);
 }
 
+default_random_engine gen;
+
 int main()
 {
     //TestDominated();
@@ -99,7 +102,9 @@ int main()
 
         for (int r = 0; r < RUN; ++r)
         {
+            gen.seed(r);
             log(r);
+
             Population sol;
             ea->Solve(sol, *prob, log);
 
@@ -111,5 +116,5 @@ int main()
         cout << "Problem " << probList[i] << " finished." << endl;
     }
     
-    system("python graph.py");
+    //system("python graph.py");
 }

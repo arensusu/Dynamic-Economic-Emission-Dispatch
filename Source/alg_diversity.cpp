@@ -6,6 +6,8 @@
 #include "alg_diversity.h"
 #include "individual.h"
 
+#include "tool.h"
+
 using namespace std;
 
 bool PolynamialMutation::operator()(Individual& ind, const double pm, const double eta) const
@@ -14,7 +16,6 @@ bool PolynamialMutation::operator()(Individual& ind, const double pm, const doub
     size_t numVariables = Individual::prob().numVariables();
 
     // Random generator.
-    default_random_engine gen(chrono::system_clock::now().time_since_epoch().count());
     uniform_real_distribution<double> dis(0.0, 1.0);
 
     // Mutation.

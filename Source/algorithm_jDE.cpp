@@ -1,7 +1,6 @@
 
 #include <fstream>
 #include <random>
-#include <chrono>
 
 #include "algorithm_jDE.h"
 #include "population.h"
@@ -17,6 +16,7 @@
 #include "alg_sorting.h"
 
 #include "log.h"
+#include "tool.h"
 
 using namespace std;
 
@@ -142,7 +142,6 @@ void JDE::SelfInitialization(Individual& ind) const
 
 void JDE::SelfAdaptive(const Individual& parent, Individual& offspring) const
 {
-    default_random_engine gen(chrono::system_clock::now().time_since_epoch().count());
     uniform_real_distribution<double> dis(0.0, 1.0);
 
     if (dis(gen) < tau1_)
