@@ -29,18 +29,18 @@ public:
     virtual size_t numPeriods() const = 0;
     virtual size_t numMachines() const = 0;
     virtual size_t numVariables() const = 0;
-    virtual size_t numObjectives() const = 0;
+    virtual size_t numObjectives() const { return numObjectives_; }
 
     // Read the setting file.
     virtual bool Read(const std::string& fname) = 0;
     
     // Evaluate the individual.
     virtual bool Evaluate(Individual& ind) const = 0;
-    virtual bool Evaluate(std::vector<double>& objs, const std::vector<double>& powers) const = 0;
+    virtual void Check(Individual& ind, const double threshold) const = 0;
 
 protected:
     std::string name_;
-
+    std::size_t numObjectives_ = 0;
 };
 
 #endif

@@ -146,53 +146,27 @@ const vector<double> Individual::PowerOutput() const
     return supplies;
 }
 
-// Check with the threshold.
-bool Individual::Check(const double threshold)
-{
-    // Parameters.
-    size_t numPeriods = problem_->numPeriods();
-
-    bool isFeasible = true;
-
-    // Calculate the gap.
-    violation_ = 0.0;
-    for (size_t t = 0; t < numPeriods; ++t)
-    {
-        const double supply = PowerOutput(t);
-        const double demand = problem_->load(t);
-
-        double diff = abs(supply - demand);
-        violation_ += diff;
-
-        if (diff > threshold)
-        {
-            isFeasible = false;
-            break;
-        }
-    }
-
-    feasible_ = isFeasible;
-
-    return isFeasible;
-}
-
 // Print.
 ostream& operator<<(ostream& os, const Individual& ind)
 {
-    //os << "Objectives: " << ind.objs()[0] << ", " << ind.objs()[1] << endl;
-    os << ind.objs()[0] << " " << ind.objs()[1];
-    //os << "Feasible: " << ind.Check();
-
     vector<double> powers = ind.Decoder();
 
-    for (size_t i = 0; i < powers.size(); ++i)
+    os << ind.objs()[0] << " " << ind.objs()[1];
+
+    if (ind.op() == -1)
     {
-        os << " " << powers[i];
+        os << " " << ind.op();
+    }
+    else
+    {
+        double FCR[] = { 0.1, 0.5, 0.9 };
+        os << " " << ind.op();
+        //os << " " << ind.op() / 9 << " " << FCR[ind.op() % 9 / 3] << " " << FCR[ind.op() % 9 % 3];
     }
 
-    //if (ind.F() != -1 || ind.CR() != -1)
+    //for (size_t i = 0; i < powers.size(); ++i)
     //{
-    //    os << " " << ind.F() << " " << ind.CR();
+    //    os << " " << powers[i];
     //}
 
     os << endl;

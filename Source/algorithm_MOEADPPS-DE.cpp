@@ -56,7 +56,7 @@ void MOEADPPSDE::Solve(Population& sol, const BProblem& prob, Log& log)
 
     WeightVectorInitialization(Psize_, prob.numObjectives());
 
-    initialize(pop, prob);
+    initialize(pop);
     for (size_t i = 0; i < Psize_; ++i)
     {
         ch(pop[i]);
@@ -121,7 +121,7 @@ void MOEADPPSDE::Solve(Population& sol, const BProblem& prob, Log& log)
         
         for (size_t i = 0; i < Psize_; ++i)
         {
-            mutate(children, pop, neighborIndice_[i], F_);
+            //mutate(children, pop, neighborIndice_[i], F_);
 
             crossover(children, pop[i], CR_);
 
@@ -273,8 +273,8 @@ void MOEADPPSDE::UpdateNeighbor(Population& pop, const Individual& ind, const si
         size_t neighborIndex = neighborIndice_[index][i];
         Individual& target = pop[neighborIndex];
 
-        double now = Tchebycheff(ind.objs(), weightVectors_[neighborIndex], referencePoint_, nadir_);
-        double origin = Tchebycheff(target.objs(), weightVectors_[neighborIndex], referencePoint_, nadir_);
+        double now = Tchebycheff(ind, weightVectors_[neighborIndex], referencePoint_, nadir_);
+        double origin = Tchebycheff(target, weightVectors_[neighborIndex], referencePoint_, nadir_);
         if (now <= origin && count < maxReplace_)
         {
             target = ind;
@@ -336,8 +336,8 @@ void MOEADPPSDE::UpdateEpsilon(const Population& pop, const size_t k)
 
 bool MOEADPPSDE::Push(Individual& neighbor, const Individual& ind, const size_t index) const
 {
-    double origin = Tchebycheff(neighbor.objs(), weightVectors_[index], referencePoint_, nadir_);
-    double trial = Tchebycheff(ind.objs(), weightVectors_[index], referencePoint_, nadir_);
+    double origin = Tchebycheff(neighbor, weightVectors_[index], referencePoint_, nadir_);
+    double trial = Tchebycheff(ind, weightVectors_[index], referencePoint_, nadir_);
 
     if (trial <= origin)
     {
@@ -350,8 +350,8 @@ bool MOEADPPSDE::Push(Individual& neighbor, const Individual& ind, const size_t 
 
 bool MOEADPPSDE::Pull(Individual& neighbor, const Individual& ind, const double epsilon, const size_t index) const
 {
-    double origin = Tchebycheff(neighbor.objs(), weightVectors_[index], referencePoint_, nadir_);
-    double trial = Tchebycheff(ind.objs(), weightVectors_[index], referencePoint_, nadir_);
+    double origin = Tchebycheff(neighbor, weightVectors_[index], referencePoint_, nadir_);
+    double trial = Tchebycheff(ind, weightVectors_[index], referencePoint_, nadir_);
 
     if ((neighbor.violation() < epsilon && ind.violation() < epsilon) || (neighbor.violation() == ind.violation()))
     {
@@ -425,7 +425,7 @@ void MOEADPPSDE::UpdateArchive(Population& arch, const Population& pop) const
     Population hybrid(arch, pop);
     arch.clear();
 
-    vector<vector<size_t>> fronts = NondominatedSort(hybrid);
+    vector<vector<size_t>> fronts = NondominatedSort(hybrid, FeasibleDominated);
 
     if (fronts[0].size() <= Psize_)
     {

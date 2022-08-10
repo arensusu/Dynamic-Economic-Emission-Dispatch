@@ -4,16 +4,22 @@
 class Population;
 class Individual;
 
-class BasicEnvSelection
+class EnvSelection
 {
 public:
-    std::size_t operator()(Population& children, const Population& parents) const;
+    std::size_t Basic(Population& next, Population& curr);
+    std::size_t CDP(Population& next, const Population& curr);
+    std::size_t PF(Population& next, Population& curr);
+
+    virtual std::size_t Select(Population& next, const Population& curr) const;
+
+    bool feasibility_ = false;
 };
 
-class GreedyEnvSelection
+class GreedyEnvSelection : public EnvSelection
 {
 public:
-    void operator()(Population& children, const Population& parents) const;
+    virtual std::size_t Select(Population& next, const Population& curr) const;
 };
 
 bool FeasibleCompare(std::vector<double>& l, std::vector<double>& r);

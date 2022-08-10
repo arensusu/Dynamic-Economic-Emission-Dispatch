@@ -88,18 +88,22 @@ bool NProblem::Evaluate(vector<double>& objs, const vector<double>& powers) cons
     size_t i = -1, j = -1;
     for (i = 0; i < numPeriods_; ++i)
     {
+        double tmpCost = 0.0;
+        double tmpEmission = 0.0;
         for (j = 0; j < numMachines_; ++j)
         {
-            cost += coeff(j, 0)
+            tmpCost += coeff(j, 0)
                   + coeff(j, 1) * powers[i * numMachines_ + j]
                   + coeff(j, 2) * pow(powers[i * numMachines_ + j], 2.0)
                   + abs(coeff(j, 3) * sin(coeff(j, 4) * (limit(j, 0) - powers[i * numMachines_ + j])));
             
-            emission += coeff(j, 5)
+            tmpEmission += coeff(j, 5)
                       + coeff(j, 6) * powers[i * numMachines_ + j]
                       + coeff(j, 7) * pow(powers[i * numMachines_ + j], 2.0)
                       + coeff(j, 8) * exp(coeff(j, 9) * powers[i * numMachines_ + j]);
         }
+        cost += tmpCost;
+        emission += tmpEmission;
     }
 
     objs[0] = cost;
@@ -110,6 +114,61 @@ bool NProblem::Evaluate(vector<double>& objs, const vector<double>& powers) cons
 
 bool NProblem::Evaluate(Individual& ind) const
 {
-    ind.Check();
+    Check(ind, 1.0);
     return Evaluate(ind.objs(), ind.Decoder());
+}
+
+void NProblem::Check(Individual& ind, const double threshold) const
+{
+    // Parameters.
+    const vector<double> vars = ind.Decoder();
+
+    ind.violations().clear();
+    // Demand constraint.
+    for (size_t t = 0; t < numPeriods_; ++t)
+    {
+        const double supply = ind.PowerOutput(t);
+        const double demand = this->load(t);
+
+        double diff = max(0.0, abs(supply - demand) - threshold);
+
+        ind.violations().push_back(diff);
+    }
+
+    // Load and ramp-rate constraint.
+    for (size_t i = 0; i < numMachines_; ++i)
+    {
+        double output = vars[i];
+        double diff = max(0.0, output - this->limit(i, 1)) + max(0.0, this->limit(i, 0) - output);
+        ind.violations().push_back(diff);
+
+        double prev = vars[i];
+
+        for (size_t t = 1; t < numPeriods_; ++t)
+        {
+            double curr = vars[t * numMachines_ + i];
+
+            diff = max(0.0, curr - min(prev + this->ramp(i, 0), this->limit(i, 1))) + max(0.0, max(prev - this->ramp(i, 1), this->limit(i, 0)) - curr);
+
+            ind.violations().push_back(max(0.0, diff - threshold));
+
+            prev = curr;
+        }
+    }
+
+    double totalViolation = 0.0;
+    for (size_t i = 0; i < ind.violations().size(); ++i)
+    {
+        totalViolation += ind.violations()[i];
+    }
+    ind.violation() = totalViolation;
+
+    if (totalViolation <= 0)
+    {
+        ind.feasible() = true;
+    }
+    else
+    {
+        ind.feasible() = false;
+    }
 }

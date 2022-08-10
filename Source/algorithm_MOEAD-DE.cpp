@@ -29,46 +29,57 @@ bool MOEADDE::Setup(ifstream& file)
     file >> dummy >> dummy >> Psize_;
     file >> dummy >> dummy >> F_;
     file >> dummy >> dummy >> CR_;
-    file >> dummy >> dummy >> neighborhood_;
+
+    neighborhood_ = Psize_ * 0.1;
+    maxReplace_ = Psize_ * 0.01;
 
     return true;
 }
 
 void MOEADDE::Solve(Population& sol, const BProblem& prob, Log& log)
 {
-    //InequalityCH ch;
-    ProportionDivisionCH ch;
+    FineTuningCH ch;
+    //DivisionCH ch;
+    //ProportionDivisionCH ch;
 
     RandomInitialization initialize;
 
     RandomMatingSelection mating;
 
-    RandOneMutation mutate;
+    RandOneMutation reproduct;
+
+    PolynamialMutation mutate;
 
     BinaryCrossover crossover;
 
     PolynamialMutation diversity;
 
-    Population pop(Psize_), archive;
+    // Set parameters of reproductions.
+    vector<double> params(2);
+    params[0] = F_;
+    params[1] = CR_;
+
+    Population pop(Psize_), archive, children;
     size_t ffe = 0;
+
+    uniform_real_distribution<double> dis(0.0, 1.0);
 
     WeightVectorInitialization(Psize_, prob.numObjectives());
 
-    initialize(pop, prob);
+    initialize(pop);
     for (size_t i = 0; i < Psize_; ++i)
     {
         ch(pop[i]);
         prob.Evaluate(pop[i]);
         ffe++;
-
-        UpdateArchive(archive, pop[i]);
     }
+
     UpdateReference(pop);
     UpdateNadir(pop);
 
     while (true)
     {
-        log.All(archive);
+        log.All(pop);
         log.Detail(pop);
 
         if (ffe >= maxffe_)
@@ -76,27 +87,34 @@ void MOEADDE::Solve(Population& sol, const BProblem& prob, Log& log)
             break;
         }
 
-        Individual children;
+        Individual child;
 
         for (size_t i = 0; i < Psize_; ++i)
         {
-            mutate(children, pop, neighborIndice_[i], F_);
+            child = pop[i];
+            if (dis(gen) < 0.9)
+            {
+                reproduct.PartNeigh(child, pop, neighborIndice_[i], params);
+            }
+            else
+            {
+                reproduct.AllNeigh(child, pop, params);
+            }
 
-            crossover(children, pop[i], CR_);
+            mutate(child, 1.0 / double(prob.numVariables()), 20);
 
-            ch(children);
-            prob.Evaluate(children);
+            ch(child);
+            prob.Evaluate(child);
             ffe++;
 
-            UpdateReference(children.objs());
+            UpdateReference(child.objs());
 
-            UpdateNeighbor(pop, children, i);
+            UpdateNeighbor(pop, child, i);
+
+            children.push_back(child);
         }
-
-        UpdateNadir(pop);
-        UpdateReference(pop);
-
-        UpdateArchive(archive, pop);
+        //log.Child(children);
+        children.clear();
     }
 
     sol = pop;
@@ -105,6 +123,7 @@ void MOEADDE::Solve(Population& sol, const BProblem& prob, Log& log)
 
 void MOEADDE::WeightVectorInitialization(const size_t size, const size_t objs)
 {
+    pi_.resize(size);
     weightVectors_.resize(size, vector<double>(objs));
 
     ifstream weightFile("./Weightvector/" + to_string(size) + "_" + to_string(objs) + ".txt");
@@ -114,6 +133,8 @@ void MOEADDE::WeightVectorInitialization(const size_t size, const size_t objs)
         {
             weightFile >> weightVectors_[i][j];
         }
+
+        pi_[i] = 1.0;
     }
 
     neighborIndice_.resize(size, vector<size_t>(neighborhood_));
@@ -204,12 +225,18 @@ void MOEADDE::UpdateNadir(const Population& pop)
     }
 }
 
-void MOEADDE::UpdateNeighbor(Population& pop, const Individual& ind, const size_t index) const
+void MOEADDE::UpdateNeighbor(Population& pop, const Individual& ind, const size_t index)
 {
     size_t count = 0;
 
     vector<size_t> order(neighborhood_);
     RandomPermutation(order);
+
+    vector<double> tmpNadir(nadir_);
+    for (size_t i = 0; i < Individual::prob().numObjectives(); ++i)
+    {
+        tmpNadir[i] = max(tmpNadir[i], ind.objs()[i]);
+    }
 
     for (size_t i = 0; i < neighborhood_; ++i)
     {
@@ -218,30 +245,21 @@ void MOEADDE::UpdateNeighbor(Population& pop, const Individual& ind, const size_
             size_t neighborIndex = neighborIndice_[index][order[i]];
             Individual& target = pop[neighborIndex];
 
-            if (ind.feasible() && !target.feasible())
+            double offspring = Tchebycheff(ind, weightVectors_[neighborIndex], referencePoint_, tmpNadir);
+            double parent = Tchebycheff(target, weightVectors_[neighborIndex], referencePoint_, tmpNadir);
+
+            if (offspring <= parent)
             {
                 target = ind;
                 count++;
-            }
-            else if (ind.feasible() && target.feasible())
-            {
-                double now = Tchebycheff(ind.objs(), weightVectors_[neighborIndex], referencePoint_, nadir_);
-                double origin = Tchebycheff(target.objs(), weightVectors_[neighborIndex], referencePoint_, nadir_);
 
-                if (now <= origin)
-                {
-                    target = ind;
-                    count++;
-                }
+                nadir_ = tmpNadir;
             }
-            else if (!ind.feasible() && !target.feasible())
-            {
-                if (ind.violation() < target.violation())
-                {
-                    target = ind;
-                    count++;
-                }
-            }
+
+        }
+        else
+        {
+            break;
         }
     }
 }
@@ -301,7 +319,7 @@ void MOEADDE::UpdateArchive(Population& arch, const Population& pop) const
     Population hybrid(arch, pop);
     arch.clear();
 
-    vector<vector<size_t>> fronts = NondominatedSort(hybrid);
+    vector<vector<size_t>> fronts = NondominatedSort(hybrid, FeasibleDominated);
 
     if (fronts[0].size() <= Psize_)
     {

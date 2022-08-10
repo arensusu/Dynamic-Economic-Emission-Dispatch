@@ -10,7 +10,7 @@
 class NProblem : public BProblem
 {
 public:
-    explicit NProblem(const std::string name = "NoLoss") : BProblem(name), numMachines_(0), numPeriods_(0), numObjectives_(0) {}
+    explicit NProblem(const std::string name = "NoLoss") : BProblem(name) {}
     virtual ~NProblem() {}
 
     // Basic settings of generators.
@@ -28,7 +28,6 @@ public:
     virtual size_t numPeriods() const { return numPeriods_; }
     virtual size_t numMachines() const { return numMachines_; }
     virtual size_t numVariables() const { return numMachines_ * numPeriods_; }
-    virtual size_t numObjectives() const { return numObjectives_; }
 
     // Read the setting file.
     virtual bool Read(const std::string& fname);
@@ -36,16 +35,16 @@ public:
     // Evaluate the individual.
     virtual bool Evaluate(Individual& ind) const;
     virtual bool Evaluate(std::vector<double>& objs, const std::vector<double>& powers) const;
-    
+    virtual void Check(Individual& ind, const double threshold) const;
+
 protected:
     std::vector<std::vector<double>> limits_;
     std::vector<std::vector<double>> coeffs_;
     std::vector<std::vector<double>> ramps_;
     std::vector<double> loads_;
 
-    std::size_t numMachines_;
-    std::size_t numPeriods_;
-    std::size_t numObjectives_;
+    std::size_t numMachines_ = 0;
+    std::size_t numPeriods_ = 0;
 
     // Set the parameters from file.
     bool SetCoeff(std::ifstream& file);

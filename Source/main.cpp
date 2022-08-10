@@ -36,9 +36,9 @@ void TestEvaluated(const BProblem* prob)
 
     ind.Encoder(enc);
     prob->Evaluate(ind);
-    bool isFeasible = ind.Check();
+    prob->Check(ind, 0.1);
 
-    if (!isFeasible)
+    if (!ind.feasible())
     {
         const vector<double> output = ind.PowerOutput();
         for (size_t i = 0; i < output.size(); ++i)
@@ -46,6 +46,8 @@ void TestEvaluated(const BProblem* prob)
             cout << output[i] << " ";
         }
         cout << endl;
+
+        cout << ind.violation() << endl;
     }
 
     cout << ind.objs()[0] << " " << ind.objs()[1] << endl;
@@ -67,7 +69,34 @@ void TestDominated()
     pop[8].objs() = vector<double>({ 3, 1 });
     pop[9].objs() = vector<double>({ 4, 2 });
 
-    vector<vector<size_t>> front = NondominatedSort(pop);
+    vector<vector<size_t>> front = NondominatedSort(pop, FeasibleDominated);
+}
+
+#include "alg_initialization.h"
+#include "alg_constraint_handling.h"
+void RepairTest(const vector<string>& probList)
+{
+    for (size_t i = 0; i < probList.size(); ++i)
+    {
+        BProblem* prob = nullptr;
+        SetProblemType(&prob, probList[i]);
+
+        Individual::SetProblem(*prob);
+
+        int repairTimes = 0;
+
+        RandomInitialization init;
+        ProportionDivisionCH ch;
+
+        Population pop(5000);
+        init(pop);
+        for (size_t i = 0; i < pop.size(); ++i)
+        {
+            repairTimes += ch(pop[i], 40);
+        }
+
+        cout << double(repairTimes) << endl;
+    }
 }
 
 default_random_engine gen;
@@ -82,9 +111,10 @@ int main()
     SetExperiment(&ea, probList, exp);
     exp.close();
 
+    //RepairTest(probList);
     
     //BProblem* prob = nullptr;
-    //SetProblemType(&prob, "5_24_WOB");
+    //SetProblemType(&prob, "6_24_WB");
     //TestEvaluated(prob);
     
     for (size_t i = 0; i < probList.size(); ++i)
@@ -112,9 +142,13 @@ int main()
             cout << "Run " << r << " finished." << endl;
         }
 
+        for (size_t i = 0; i < avg.size(); ++i)
+        {
+            prob->Check(avg[i], 1);
+        }
+
         log.Average(avg);
         cout << "Problem " << probList[i] << " finished." << endl;
     }
     
-    //system("python graph.py");
 }

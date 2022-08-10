@@ -19,7 +19,7 @@ bool OneDimLS::operator()(Population& pop) const
     ProportionDivisionCH ch;
     Compromise comp;
 
-    vector<vector<size_t>> fronts = NondominatedSort(pop);
+    vector<vector<size_t>> fronts = NondominatedSort(pop, FeasibleDominated);
 
     uniform_real_distribution<double> dis(0.0, 1.0);
 

@@ -38,19 +38,15 @@ bool JDE::Setup(ifstream& file)
 
 void JDE::Solve(Population& sol, const BProblem& prob, Log& log)
 {
-    //DivisionCH ch;
     ProportionDivisionCH ch;
-    //FineTuningCH ch;
 
     RandomInitialization initialization;
 
-    BestOneMutation mutation;
-    //CurrentToBestMutation mutation;
-    //RandOneMutation mutation;
+    RandOneMutation mutation;
 
     BinaryCrossover crossover;
 
-    BasicEnvSelection envSelection;
+    EnvSelection envSelection;
 
     PolynamialMutation diversity;
 
@@ -59,7 +55,7 @@ void JDE::Solve(Population& sol, const BProblem& prob, Log& log)
     int ffe = 0;
 
     //initialization
-    initialization(pop[curr], prob);
+    initialization(pop[curr]);
     SelfInitialization(pop[curr]);
     for (size_t i = 0; i < Psize_; ++i)
     {
@@ -77,10 +73,8 @@ void JDE::Solve(Population& sol, const BProblem& prob, Log& log)
         pop[curr].resize(Psize_ * 2);
 
         //mutation
-        mutation(pop[curr]);
 
         //crossover
-        crossover(pop[curr]);
 
         // Self-adaptive.
         SelfAdaptive(pop[curr]);
@@ -95,7 +89,7 @@ void JDE::Solve(Population& sol, const BProblem& prob, Log& log)
         }
 
         //selection
-        envSelection(pop[next], pop[curr]);
+        envSelection.CDP(pop[next], pop[curr]);
 
         //print objectives
         log.All(pop[next]);

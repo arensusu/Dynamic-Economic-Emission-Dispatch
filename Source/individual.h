@@ -9,7 +9,7 @@
 class Individual
 {
 public:
-    explicit Individual() { encoding_.resize(problem_->numVariables()); objectives_.resize(problem_->numObjectives()); }
+    explicit Individual() { encoding_.resize(problem_->numVariables(), -1.0); objectives_.resize(problem_->numObjectives()); modifiedObjs_.resize(problem_->numObjectives()); }
     ~Individual() {}
 
     // Access the private data.
@@ -19,24 +19,19 @@ public:
     const std::vector<double>& objs() const { return objectives_; }
     std::vector<double>& objs() { return objectives_; }
 
-    bool feasible() const { return feasible_; }
+    const std::vector<double>& violations() const { return violations_; }
+    std::vector<double>& violations() { return violations_; }
+
+    const bool feasible() const { return feasible_; }
+    bool& feasible() { return feasible_; }
     
-    const double violation() const { return violation_; }
-    double& violation() { return violation_; }
+    const double violation() const { return totalViolation_; }
+    double& violation() { return totalViolation_; }
 
     const double operator[](const int i) const { return encoding_[i]; }
     double& operator[](const int i) { return encoding_[i]; }
 
-    bool operator==(const Individual& ind) const { return (this->objs()[0] == ind.objs()[0]) && (this->objs()[1] == ind.objs()[1]); }
-
-    const double F() const { return F_; }
-    double& F() { return F_; }
-
-    const double CR() const { return CR_; }
-    double& CR() { return CR_; }
-
-    const double fitness() const { return fitness_; }
-    double& fitness() { return fitness_; }
+    bool operator==(const Individual& ind) const { return (this->objs()[0] == ind.objs()[0]) && (this->objs()[1] == ind.objs()[1]) && (this->violation() == ind.violation()); }
 
     // Normalize to [0, 1].
     void Encoder(const std::size_t t, const std::vector<double>& powers);
@@ -51,21 +46,36 @@ public:
     const double PowerOutput(const std::size_t t) const;
     const std::vector<double> PowerOutput() const;
 
-    // Check the individual is feasible or not.
-    bool Check(const double threshold = 0.001);
-
     // Problem of all individuals.
     static void SetProblem(const BProblem& prob) { problem_ = &prob; }
     static const BProblem& prob() { return *problem_; }
 
+    const double F() const { return F_; }
+    double& F() { return F_; }
+
+    const double CR() const { return CR_; }
+    double& CR() { return CR_; }
+
+    const int op() const { return op_; }
+    int& op() { return op_; }
+
+    const double fitness() const { return fitness_; }
+    double& fitness() { return fitness_; }
+
+    const std::vector<double>& modifiedObjs() const { return modifiedObjs_; }
+    std::vector<double>& modifiedObjs() { return modifiedObjs_; }
 
 protected:
     std::vector<double> encoding_;
     std::vector<double> objectives_;
+    std::vector<double> violations_;
+    std::vector<double> modifiedObjs_;
 
     bool feasible_ = false;
 
-    double violation_ = 0.0;
+    double totalViolation_ = 0.0;
+
+    int op_ = -1;
 
     // Self-adaptive.
     double F_ = -1;

@@ -21,14 +21,18 @@ using namespace std;
 void NSDE::Solve(Population& sol, const BProblem& prob, Log& log)
 {
     ProportionDivisionCH ch;
+    //ZeroOneCH ch;
+    //InequalityCH ch;
 
     RandomInitialization initialization;
 
     RandOneMutation mutation;
 
-    BinaryCrossover crossover;
+    vector<double> params(2);
+    params[0] = F_;
+    params[1] = CR_;
 
-    BasicEnvSelection envSelection;
+    EnvSelection env;
 
     PolynamialMutation diversity;
 
@@ -37,7 +41,7 @@ void NSDE::Solve(Population& sol, const BProblem& prob, Log& log)
     int ffe = 0;
 
     //initialization
-    initialization(pop[curr], prob);
+    initialization(pop[curr]);
     for (size_t i = 0; i < Psize_; ++i)
     {
         //CH
@@ -45,56 +49,42 @@ void NSDE::Solve(Population& sol, const BProblem& prob, Log& log)
         prob.Evaluate(pop[curr][i]);
         ffe++;
     }
+    pop[next] = pop[curr];
+
+    //print objectives
+    log.All(pop[curr]);
+    log.Detail(pop[curr]);
 
     while (true)
     {
-        // Adaptive control.
-        //Adaptive(ffe);
+        for (size_t i = 0; i < Psize_; ++i)
+        {
+            mutation.AllNeigh(pop[next][i], pop[curr], params);
+            diversity(pop[next][i], double(1.0 / prob.numVariables()));
 
+            //CH
+            ch(pop[next][i]);
+            prob.Evaluate(pop[next][i]);
+            ffe++;
+        }
+
+        //selection
+        Population hybrid(pop[next], pop[curr]);
         pop[next].clear();
         pop[next].resize(Psize_);
 
-        pop[curr].resize(Psize_ * 2);
-
-        //mutation
-        
-        mutation(pop[curr], F_);
-
-        //crossover
-        crossover(pop[curr], CR_);
-
-        for (size_t i = 0; i < Psize_; ++i)
-        {
-            //CH
-            ch(pop[curr][Psize_ + i]);
-            prob.Evaluate(pop[curr][Psize_ + i]);
-            ffe++;
-
-        }
-        //selection
-        envSelection(pop[next], pop[curr]);
+        env.CDP(pop[next], hybrid);
 
         //print objectives
         log.All(pop[next]);
         log.Detail(pop[next]);
 
-        swap(pop[curr], pop[next]);
+        pop[curr] = pop[next];
 
         if (ffe >= maxffe_)
         {
             break;
         }
-
-        // Diversity control.
-        //for (size_t i = 0; i < Psize_; ++i)
-        //{
-        //    if (diversity(pop[curr][i], 1.0 / double(prob.numVariables())))
-        //    {
-        //        ch(pop[curr][i]);
-        //        prob.Evaluate(pop[curr][i]);
-        //        ffe++;
-        //    }
-        //}
     }
 
     sol = pop[curr];

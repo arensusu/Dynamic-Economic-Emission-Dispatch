@@ -11,7 +11,7 @@ class Individual;
 class MOEADDE : public DE
 {
 public:
-    explicit MOEADDE() : DE("MOEADDE"), neighborhood_(10) {}
+    explicit MOEADDE() : DE("MOEADDE") {}
     ~MOEADDE() {}
 
     virtual bool Setup(std::ifstream& file);
@@ -25,17 +25,18 @@ public:
     void UpdateNadir(const std::vector<double>& objs);
     void UpdateNadir(const Population& pop);
 
-    void UpdateNeighbor(Population& pop, const Individual& ind, const std::size_t index) const;
+    virtual void UpdateNeighbor(Population& pop, const Individual& ind, const std::size_t index);
 
     void UpdateArchive(Population& arch, const Individual& ind) const;
     void UpdateArchive(Population& arch, const Population& pop) const;
 
-private:
-    std::size_t neighborhood_;
+protected:
+    std::size_t neighborhood_ = 10;
     std::size_t maxReplace_ = 1;
 
     std::vector<std::vector<double>> weightVectors_;
     std::vector<std::vector<std::size_t>> neighborIndice_;
+    std::vector<double> pi_;
     std::vector<double> referencePoint_;
     std::vector<double> nadir_;
 

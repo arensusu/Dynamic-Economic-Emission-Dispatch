@@ -11,6 +11,24 @@
 
 using namespace std;
 
+void ZeroOneCH::operator()(Individual& ind) const
+{
+    size_t numVariables = Individual::prob().numVariables();
+
+    for (size_t i = 0; i < numVariables; ++i)
+    {
+        if (ind[i] < 0.0)
+        {
+            ind[i] = 0.0;
+        }
+
+        if (ind[i] > 1.0)
+        {
+            ind[i] = 1.0;
+        }
+    }
+}
+
 void InequalityCH::operator()(Individual& ind) const
 {
     size_t numPeriods = Individual::prob().numPeriods();
@@ -146,7 +164,7 @@ size_t RouletteWheel(const vector<double>& remains)
     }
 }
 
-void DivisionCH::operator()(Individual& ind, const size_t maxTry, const double threshold) const
+int DivisionCH::operator()(Individual& ind, const size_t maxTry, const double threshold) const
 {
     // Parameters.
     size_t numPeriods = Individual::prob().numPeriods();
@@ -156,7 +174,10 @@ void DivisionCH::operator()(Individual& ind, const size_t maxTry, const double t
 
     double supply;
 
+    int repairTime = 0;
+
     vector<double> prev;
+
     for (size_t t = 0; t < numPeriods; ++t)
     {
         const double demand = Individual::prob().load(t);
@@ -169,13 +190,8 @@ void DivisionCH::operator()(Individual& ind, const size_t maxTry, const double t
         double diff = demand - supply;
 
         size_t i = 0;
-        while (i < maxTry)
+        while (abs(diff) >= threshold && i < maxTry)
         {
-            if (abs(diff) < threshold)
-            {
-                break;
-            }
-
             // Adjust all machines.
             double div = diff / numMachines;
             for (size_t j = 0; j < numMachines; ++j)
@@ -190,16 +206,21 @@ void DivisionCH::operator()(Individual& ind, const size_t maxTry, const double t
 
             i++;
         }
-        
+
+        if (i == maxTry)
+        {
+            repairTime += 1;
+        }
+
         ind.Encoder(t, power_t);
 
         prev = power_t;
     }
 
-    return;
+    return repairTime;
 }
 
-void FineTuningCH::operator()(Individual& ind, const size_t maxTry, const double threshold) const
+int FineTuningCH::operator()(Individual& ind, const size_t maxTry, const double threshold) const
 {
     // Parameters.
     size_t numPeriods = Individual::prob().numPeriods();
@@ -211,7 +232,10 @@ void FineTuningCH::operator()(Individual& ind, const size_t maxTry, const double
 
     double supply;
 
+    int repairTime = 0;
+
     vector<double> prev;
+
     for (int t = 0; t < numPeriods; ++t)
     {
         const double demand = Individual::prob().load(t);
@@ -224,13 +248,8 @@ void FineTuningCH::operator()(Individual& ind, const size_t maxTry, const double
         double diff = demand - supply;
 
         int i = 0;
-        while (i < maxTry)
+        while (abs(diff) >= threshold && i < maxTry)
         {
-            if (abs(diff) < threshold)
-            {
-                break;
-            }
-
             size_t j = dis(gen);
 
             power_t[j] = power_t[j] + diff;
@@ -243,73 +262,9 @@ void FineTuningCH::operator()(Individual& ind, const size_t maxTry, const double
             i++;
         }
 
-        ind.Encoder(t, power_t);
-
-        prev = power_t;
-    }
-
-    return;
-}
-
-void TFineTuningCH::operator()(Individual& ind, const size_t maxTry, const double threshold) const
-{
-    // Parameters.
-    size_t numPeriods = Individual::prob().numPeriods();
-    size_t numMachines = Individual::prob().numMachines();
-
-    InequalityCH inequal;
-
-    double supply;
-
-    vector<double> prev;
-    for (int t = 0; t < numPeriods; ++t)
-    {
-        const double demand = Individual::prob().load(t);
-
-        vector<double> power_t = ind.Decoder(t);
-
-        inequal(power_t, prev, Individual::prob());
-        supply = Individual::PowerOutput(power_t);
-
-        double diff = demand - supply;
-
-        int i = 0;
-        while (i < maxTry)
+        if (i == maxTry)
         {
-            if (abs(diff) < threshold)
-            {
-                break;
-            }
-            
-            // How much can adjusting.
-            vector<double> remains;
-            int sign;
-            if (diff < 0)
-            {
-                sign = -1;
-                remains = PowerRemain(power_t, prev, sign, Individual::prob());
-            }
-            else
-            {
-                sign = 1;
-                remains = PowerRemain(power_t, prev, sign, Individual::prob());
-            }
-
-            // Choose a machine by roulette wheel.
-            size_t j = RouletteWheel(remains);
-            if (j == numMachines)
-            {
-                break;
-            }
-
-            power_t[j] += min(abs(diff), remains[j]) * double(sign);
-
-            inequal(power_t, prev, Individual::prob());
-            supply = Individual::PowerOutput(power_t);
-
-            diff = demand - supply;
-
-            i++;
+            repairTime += 1;
         }
 
         ind.Encoder(t, power_t);
@@ -317,7 +272,7 @@ void TFineTuningCH::operator()(Individual& ind, const size_t maxTry, const doubl
         prev = power_t;
     }
 
-    return;
+    return repairTime;
 }
 
 const vector<double> Proportion(const BProblem& prob)
@@ -346,7 +301,7 @@ const vector<double> Proportion(const BProblem& prob)
     return prop;
 }
 
-void ProportionDivisionCH::operator()(Individual& ind, const size_t maxTry, const double threshold) const
+int ProportionDivisionCH::operator()(Individual& ind, const size_t maxTry, const double threshold) const
 {
     // Parameters.
     size_t numPeriods = Individual::prob().numPeriods();
@@ -358,7 +313,10 @@ void ProportionDivisionCH::operator()(Individual& ind, const size_t maxTry, cons
 
     double supply;
 
+    int repairTime = 0;
+
     vector<double> prev;
+
     for (size_t t = 0; t < numPeriods; ++t)
     {
         const double demand = Individual::prob().load(t);
@@ -366,18 +324,13 @@ void ProportionDivisionCH::operator()(Individual& ind, const size_t maxTry, cons
         vector<double> power_t = ind.Decoder(t);
 
         inequal(power_t, prev, Individual::prob());
-        supply = Individual::PowerOutput(power_t);
 
+        supply = Individual::PowerOutput(power_t);
         double diff = demand - supply;
 
         size_t i = 0;
-        while (i < maxTry)
+        while (abs(diff) >= threshold && i < maxTry)
         {
-            if (abs(diff) < threshold)
-            {
-                break;
-            }
-
             // Adjust all machines.
             for (size_t j = 0; j < numMachines; ++j)
             {
@@ -385,11 +338,16 @@ void ProportionDivisionCH::operator()(Individual& ind, const size_t maxTry, cons
             }
 
             inequal(power_t, prev, Individual::prob());
+            
             supply = Individual::PowerOutput(power_t);
-
             diff = demand - supply;
 
             i++;
+        }
+
+        if (i == maxTry)
+        {
+            repairTime += 1;
         }
 
         ind.Encoder(t, power_t);
@@ -397,5 +355,5 @@ void ProportionDivisionCH::operator()(Individual& ind, const size_t maxTry, cons
         prev = power_t;
     }
 
-    return;
+    return repairTime;
 }

@@ -11,23 +11,46 @@
 
 using namespace std;
 
-void RandomInitialization::operator()(Population& pop, const BProblem& prob) const
+void RandomInitialization::operator()(Population& pop) const
 {
     for (size_t i = 0; i < pop.size(); ++i)
     {
-        (*this)(pop[i], prob);
+        (*this)(pop[i]);
     }
-    return;
 }
 
-void RandomInitialization::operator()(Individual& ind, const BProblem& prob) const
+void RandomInitialization::operator()(Individual& ind) const
 {
     uniform_real_distribution<double> dis(0.0, 1.0);
 
-    for (size_t i = 0; i < prob.numVariables(); ++i)
+    for (size_t i = 0; i < Individual::prob().numVariables(); ++i)
     {
         ind[i] = dis(gen);
     }
+}
 
-    return;
+void SubProblemInitialization::operator()(Population& pop, size_t index) const
+{
+    for (size_t i = 0; i < pop.size(); ++i)
+    {
+        (*this)(pop[i], index);
+    }
+}
+
+void SubProblemInitialization::operator()(Individual& ind, size_t index) const
+{
+    size_t numMachines = Individual::prob().numMachines();
+    size_t numPeriods = Individual::prob().numPeriods();
+    uniform_real_distribution<double> dis(0.0, 1.0);
+
+    for (size_t t = 0; t < numPeriods; ++t)
+    {
+        if (t == index)
+        {
+            for (size_t i = 0; i < numMachines; ++i)
+            {
+                ind[t * numMachines + i] = dis(gen);
+            }
+        }
+    }
 }

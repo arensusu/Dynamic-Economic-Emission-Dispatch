@@ -9,11 +9,48 @@
 
 using namespace std;
 
-size_t BasicEnvSelection::operator()(Population& children, const Population& parents) const
+size_t EnvSelection::Basic(Population& next, Population& curr)
 {
-    vector<vector<size_t>> fronts = NondominatedSort(parents);
+    this->feasibility_ = false;
 
-    size_t remains = children.size();
+    return this->Select(next, curr);
+}
+
+size_t EnvSelection::CDP(Population& next, const Population& curr)
+{
+    this->feasibility_ = true;
+
+    return this->Select(next, curr);
+}
+
+size_t EnvSelection::PF(Population& next, Population& curr)
+{
+    this->feasibility_ = false;
+
+    for (size_t i = 0; i < curr.size(); ++i)
+    {
+        for (size_t j = 0; j < Individual::prob().numObjectives(); ++j)
+        {
+            curr[i].modifiedObjs()[j] = curr[i].objs()[j] + 10000 * curr[i].violation();
+        }
+    }
+
+    return this->Select(next, curr);
+}
+
+size_t EnvSelection::Select(Population& next, const Population& curr) const
+{
+    vector<vector<size_t>> fronts;
+    if (feasibility_ == false)
+    {
+        fronts = NondominatedSort(curr, Dominated);
+    }
+    else
+    {
+        fronts = NondominatedSort(curr, FeasibleDominated);
+    }
+
+    size_t remains = next.size();
     size_t rank = 0;
     
     while (remains > 0 && rank < fronts.size())
@@ -23,10 +60,10 @@ size_t BasicEnvSelection::operator()(Population& children, const Population& par
         {
             for (size_t i = 0; i < fronts[rank].size(); ++i)
             {
-                size_t pos = children.size() - remains;
+                size_t pos = next.size() - remains;
                 size_t index = fronts[rank][i];
 
-                children[pos] = parents[index];
+                next[pos] = curr[index];
                 remains--;
             }
 
@@ -34,14 +71,14 @@ size_t BasicEnvSelection::operator()(Population& children, const Population& par
         }
         else
         {
-            CrowdingDistanceSort(fronts[rank], parents);
+            CrowdingDistanceSort(fronts[rank], curr);
             
             for (size_t i = 0; i < remains; ++i)
             {
-                size_t pos = children.size() - remains + i;
+                size_t pos = next.size() - remains + i;
                 size_t index = fronts[rank][i];
 
-                children[pos] = parents[index];
+                next[pos] = curr[index];
             }
 
             remains = 0;
@@ -49,23 +86,33 @@ size_t BasicEnvSelection::operator()(Population& children, const Population& par
     }
     
     // Return the size of pareto fronts.
-    return fronts[0].size() > children.size() ? children.size() : fronts[0].size();
+    return fronts[0].size() > next.size() ? next.size() : fronts[0].size();
 }
 
-void GreedyEnvSelection::operator()(Population& children, const Population& parents) const
+size_t GreedyEnvSelection::Select(Population& next, const Population& curr) const
 {
-    size_t pSize = children.size();
-    for (size_t i = 0; i < pSize; ++i)
+    if (feasibility_ == false)
     {
-        if (Dominated(parents[pSize + i], parents[i]))
+        for (size_t i = 0; i < next.size(); ++i)
         {
-            children[i] = parents[pSize + i];
-        }
-        else
-        {
-            children[i] = parents[i];
+            if (Dominated(curr[i], next[i]))
+            {
+                next[i] = curr[i];
+            }
         }
     }
+    else
+    {
+        for (size_t i = 0; i < next.size(); ++i)
+        {
+            if (FeasibleDominated(curr[i], next[i]))
+            {
+                next[i] = curr[i];
+            }
+        }
+    }
+
+    return 0;
 }
 
 bool FeasibleCompare(vector<double>& l, vector<double>& r)

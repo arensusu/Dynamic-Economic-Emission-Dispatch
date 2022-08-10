@@ -14,9 +14,7 @@ public:
 
     virtual bool Setup(std::ifstream& file);
 
-    virtual void Solve(Population& sol, const BProblem& prob, Log& log);
-
-    virtual void SPEA2(Population& sol, const BProblem& prob, Log& log);
+    virtual void Solve(Population& sol, const BProblem& prob, Log& log) = 0;
 
     virtual double& F() { return F_; }
     virtual double& CR() { return CR_; }

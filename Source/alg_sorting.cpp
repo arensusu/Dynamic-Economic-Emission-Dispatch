@@ -43,24 +43,22 @@ bool FeasibleDominated(const Individual& l, const Individual& r)
     {
         better = false;
     }
-    else
+    else if (!feasibleL && !feasibleR)
     {
-        for (size_t i = 0; i < l.objs().size(); ++i)
+        if (l.violation() < r.violation())
         {
-            if (l.objs()[i] > r.objs()[i])
-            {
-                return false;
-            }
-            else if (l.objs()[i] < r.objs()[i])
-            {
-                better = true;
-            }
+            better = true;
         }
     }
+    else
+    {
+        better = Dominated(l, r);
+    }
+
     return better;
 }
 
-vector<vector<size_t>> NondominatedSort(const Population& pop)
+vector<vector<size_t>> NondominatedSort(const Population& pop, bool (*Dominate)(const Individual&, const Individual&))
 {
     vector<vector<size_t>> fronts;
     vector<size_t> curFront;
@@ -75,13 +73,11 @@ vector<vector<size_t>> NondominatedSort(const Population& pop)
         {
             if (i == j) continue;
 
-            //if (Dominated(pop[i], pop[j]))          // I dominate the other.
-            if (FeasibleDominated(pop[i], pop[j]))
+            if (Dominate(pop[i], pop[j]))          // I dominate the other.
             {
                 dominatedSet[i].push_back(j);
             }
-            //else if (Dominated(pop[j], pop[i]))     // The orther dominates me.
-            else if (FeasibleDominated(pop[j], pop[i]))
+            else if (Dominate(pop[j], pop[i]))     // The orther dominates me.
             {
                 beDominated[i]++;
             }

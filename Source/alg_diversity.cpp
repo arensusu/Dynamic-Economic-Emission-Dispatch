@@ -22,7 +22,8 @@ bool PolynamialMutation::operator()(Individual& ind, const double pm, const doub
     bool perturb = false;
     for (size_t i = 0; i < numVariables; ++i)
     {
-        if (dis(gen) < pm)
+        double x = ind.encoding()[i];
+        if (dis(gen) < pm && (x >= 0.0 && x <= 1.0))
         {
             perturb = true;
 
@@ -32,15 +33,15 @@ bool PolynamialMutation::operator()(Individual& ind, const double pm, const doub
             if (r1 <= 0.5)
             {
                 // (2 * r1) ^ ( 1 / (eta + 1)) - 1.
-                delta = pow((2.0 * r1), (1.0 / (eta + 1))) - 1.0;
+                delta = pow((2.0 * r1 + (1.0 - 2 * r1) * pow(1.0 - x, eta + 1.0)), (1.0 / (eta + 1.0))) - 1.0;
             }
             else
             {
                 // 1 - (2 * (1 - r1)) ^ (1 / (eta + 1)).
-                delta = 1.0 - pow((2.0 * (1 - r1)), (1.0 / (eta + 1.0)));
+                delta = 1.0 - pow((2.0 * (1 - r1) + 2 * (r1 - 0.5) * pow(1.0 - x, eta + 1)), (1.0 / (eta + 1.0)));
             }
 
-            ind.encoding()[i] += delta * 1.0;
+            ind.encoding()[i] += delta;
         }
     }
 

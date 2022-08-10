@@ -10,7 +10,7 @@ bool Dominated(const Individual& l, const Individual& r);
 
 bool FeasibleDominated(const Individual& l, const Individual& r);
 
-std::vector<std::vector<std::size_t>> NondominatedSort(const Population& pop);
+std::vector<std::vector<std::size_t>> NondominatedSort(const Population& pop, bool (*Dominate)(const Individual&, const Individual&));
 
 void CrowdingDistanceSort(std::vector<std::size_t>& fronts, const Population& pop);
 

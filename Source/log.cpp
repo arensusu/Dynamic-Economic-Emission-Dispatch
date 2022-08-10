@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <filesystem>
 
+#include "tool.h"
 #include "log.h"
 #include "population.h"
 #include "individual.h"
@@ -33,17 +34,12 @@ Log::Log(const string& name, const size_t run)
 void Log::All(const Population& pop)
 {
     trend_ << igd_(pop) << endl;
-    //for (size_t i = 0; i < pop.size(); ++i)
-    //{
-    //    trend_ << pop[i];
-    //}
-    //trend_ << endl;
 }
 
 void Log::Front(const Population& pop)
 {
     Population paretoPop;
-    vector<vector<size_t>> fronts = NondominatedSort(pop);
+    vector<vector<size_t>> fronts = NondominatedSort(pop, FeasibleDominated);
     for (size_t i = 0; i < fronts[0].size(); ++i)
     {
         paretoPop.push_back(pop[fronts[0][i]]);
@@ -65,6 +61,33 @@ void Log::Detail(const Population& pop)
     detail_ << endl;
 }
 
+void Log::OpCount(const vector<int>& counts)
+{
+    for (size_t i = 0; i < counts.size(); ++i)
+    {
+        op_ << counts[i] << " ";
+    }
+    op_ << endl;
+}
+
+void Log::OpCount(const vector<double>& counts)
+{
+    for (size_t i = 0; i < counts.size(); ++i)
+    {
+        op_ << counts[i] << " ";
+    }
+    op_ << endl;
+}
+
+void Log::Child(const Population& pop)
+{
+    for (size_t i = 0; i < pop.size(); ++i)
+    {
+        child_ << pop[i];
+    }
+    child_ << endl;
+}
+
 void Log::Average(const Population& pop)
 {
     ofstream all(pname_ + "/all.avg", ios::out);
@@ -84,35 +107,18 @@ void Log::Average(const Population& pop)
     all << "Max_IGD : " << igdVals_[igdVals_.size() - 1] << endl;
     all << "Avg_IGD : " << avgIgd << endl;
 
-    //Feasible check.
-    Population feasiblePop;
-    for (size_t i = 0; i < pop.size(); ++i)
-    {
-        //if (pop[i].Check())
-        {
-            feasiblePop.push_back(pop[i]);
-        }
-    }
-
     // Pareto front.
-    size_t frontSize;
-    Population paretoSet(final_);
-
-    BasicEnvSelection env;
-    if (feasiblePop.size() == 0)
-    {
-        frontSize = env(paretoSet, pop);
-    }
-    else
-    {
-        frontSize = env(paretoSet, feasiblePop);
-    }
+    EnvSelection env;
     
-    paretoSet.resize(frontSize);
+    vector<vector<size_t>> fronts = NondominatedSort(pop, FeasibleDominated);
 
-    sort(paretoSet.begin(), paretoSet.begin() + frontSize, firstComp);
+    Population paretoSet(fronts[0].size());
 
-    for (size_t i = 0; i < frontSize; ++i)
+    env.CDP(paretoSet, pop);
+
+    sort(paretoSet.begin(), paretoSet.begin() + paretoSet.size(), firstComp);
+
+    for (size_t i = 0; i < paretoSet.size(); ++i)
     {
         all << "(";
         for (size_t j = 0; j < Individual::prob().numObjectives(); ++j)
@@ -153,4 +159,10 @@ void Log::operator()(const int i)
 
     detail_.close();
     detail_.open(pname_ + "/" + to_string(i) + ".detail", ios::out);
+
+    op_.close();
+    op_.open(pname_ + "/" + to_string(i) + ".op", ios::out);
+
+    child_.close();
+    child_.open(pname_ + "/" + to_string(i) + ".child", ios::out);
 }

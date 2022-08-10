@@ -28,7 +28,6 @@ bool WBProblem::SetB(ifstream& file)
 
     B1_.resize(numMachines_, 0);
 
-    file >> dummy;
     for (size_t i = 0; i < numMachines_; ++i)
     {
         // Linear term.
@@ -41,7 +40,6 @@ bool WBProblem::SetB(ifstream& file)
         return false;
     }
 
-    file >> dummy;
     // Constant term.
     file >> B0_;
 

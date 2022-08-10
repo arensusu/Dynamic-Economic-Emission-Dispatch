@@ -15,232 +15,219 @@
 
 using namespace std;
 
+// mutation.
 
-void RandOneMutation::operator()(Population& pop, const size_t pos, const double F) const
+void Mutation::AllNeigh(Individual& mutant, const Population& parents, const vector<double> params) const
 {
-    // Parameters.
-    size_t numVariables = Individual::prob().numVariables();
-    size_t Psize = pop.size() / 2;
+    vector<size_t> index(parents.size());
+    Permutation(index);
 
-    // Get random individuals.
-    vector<int> index(Psize);
-    for (size_t i = 0; i < Psize; ++i)
-    {
-        index[i] = i;
-    }
-
-    shuffle(index.begin(), index.end(), gen);
-
-    const Individual& r1 = pop[index[0]];
-    const Individual& r2 = pop[index[1]];
-    const Individual& r3 = pop[index[2]];
-
-    // Create mutant vector.
-    Individual& mutant = pop[Psize + pos];
-    for (size_t i = 0; i < numVariables; ++i)
-    {
-        mutant[i] = r1[i] + F * (r2[i] - r3[i]);
-    }
+    (*this).PartNeigh(mutant, parents, index, params);
 }
 
-void RandOneMutation::operator()(Population& pop, const double F) const
-{
-    for (size_t i = 0; i < pop.size() / 2; ++i)
-    {
-        (*this)(pop, i, F);
-    }
-}
-
-void RandOneMutation::operator()(Population& pop) const
-{
-    for (size_t i = 0; i < pop.size() / 2; ++i)
-    {
-        (*this)(pop, i, pop[i].F());
-    }
-}
-
-void RandOneMutation::operator()(Individual& mutant, const Population& rands, const double F) const
-{
-    size_t numVariables = Individual::prob().numVariables();
-
-    for (size_t i = 0; i < numVariables; ++i)
-    {
-        mutant[i] = rands[0][i] + F * (rands[1][i] - rands[2][i]);
-    }
-}
-
-void RandOneMutation::operator()(Population& mutants,
-                                 const Population& parent,
-                                 const vector<vector<size_t>>& neighborhood,
-                                 const double F) const
-{
-    for (size_t i = 0; i < mutants.size(); ++i)
-    {
-        (*this)(mutants[i], parent, neighborhood[i], F);
-    }
-}
-
-void RandOneMutation::operator()(Individual& mutant, const Population& parent, const vector<size_t> neighborhood, const double F) const
+void Mutation::PartNeigh(Individual& mutant, const Population& parents, const vector<size_t> neighborhood, const vector<double> params) const
 {
     RandomMatingSelection matingSelect;
 
-    vector<size_t> index = matingSelect(neighborhood, 3);
+    vector<size_t> index = matingSelect(neighborhood, nums_);
 
-    Population rands;
-    for (size_t i = 0; i < index.size(); ++i)
+    vector<Individual> rands(nums_);
+    for (size_t i = 0; i < nums_; ++i)
     {
-        rands.push_back(parent[index[i]]);
+        rands[i] = parents[index[i]];
     }
 
-    (*this)(mutant, rands, F);
+    (*this)(mutant, rands, params);
 }
 
-void BestOneMutation::operator() (Population& pop, const double F) const
+//------------------------------------------------------------------------------------------------------------------
+// rand/1.
+void RandOneMutation::operator()(Individual& mutant, const vector<Individual>& rands, const vector<double> params) const
 {
-    // Parameters.
     size_t numVariables = Individual::prob().numVariables();
-    size_t Psize = pop.size() / 2;
+    uniform_real_distribution<double> dis(0.0, 1.0);
 
-    Population parent(pop.begin(), pop.begin() + Psize);
-    vector<vector<size_t>> fronts = NondominatedSort(parent);
-
-    uniform_int_distribution<size_t> dis(0, fronts[0].size() - 1);
-
-    for (size_t pos = 0; pos < Psize; ++pos)
+    for (size_t i = 0; i < numVariables; ++i)
     {
-        // Get random individuals.
-        vector<int> index(Psize);
-        for (size_t i = 0; i < Psize; ++i)
+        if (dis(gen) < params[1])
         {
-            index[i] = i;
-        }
-        shuffle(index.begin(), index.end(), gen);
-
-        const Individual& r2 = pop[index[0]];
-        const Individual& r3 = pop[index[1]];
-
-        // Get best individual.
-        const Individual& best = pop[fronts[0][dis(gen)]];
-
-        // Create mutant vector.
-        const Individual& curr = pop[pos];
-        Individual& mutant = pop[Psize + pos];
-        for (size_t i = 0; i < Individual::prob().numVariables(); ++i)
-        {
-            mutant[i] = best[i] + F * (r2[i] - r3[i]);
+            mutant[i] = rands[0][i] + params[0] * (rands[1][i] - rands[2][i]);
         }
     }
 }
 
-void BestOneMutation::operator() (Population& pop) const
+//-------------------------------------------------------------------------------------------------------------------
+// rand/2.
+
+void RandTwoMutation::operator()(Individual& mutant, const vector<Individual>& rands, const vector<double> params) const
 {
-    // Parameters.
     size_t numVariables = Individual::prob().numVariables();
-    size_t Psize = pop.size() / 2;
+    uniform_real_distribution<double> dis(0.0, 1.0);
 
-    Population parent(pop.begin(), pop.begin() + Psize);
-    vector<vector<size_t>> fronts = NondominatedSort(parent);
-
-    uniform_int_distribution<size_t> dis(0, fronts[0].size() - 1);
-
-    for (size_t pos = 0; pos < Psize; ++pos)
+    for (size_t i = 0; i < numVariables; ++i)
     {
-        // Get random individuals.
-        vector<int> index(Psize);
-        for (size_t i = 0; i < Psize; ++i)
+        if (dis(gen) < params[1])
         {
-            index[i] = i;
-        }
-        shuffle(index.begin(), index.end(), gen);
-
-        const Individual& r2 = pop[index[0]];
-        const Individual& r3 = pop[index[1]];
-
-        // Get best individual.
-        const Individual& best = pop[fronts[0][dis(gen)]];
-
-        // Create mutant vector.
-        const Individual& curr = pop[pos];
-        Individual& mutant = pop[Psize + pos];
-        for (size_t i = 0; i < Individual::prob().numVariables(); ++i)
-        {
-            mutant[i] = best[i] + curr.F() * (r2[i] - r3[i]);
+            mutant[i] = rands[0][i] + params[0] * (rands[1][i] - rands[2][i] + rands[3][i] - rands[4][i]);
         }
     }
 }
 
-void CurrentToBestMutation::operator()(Population& pop, const double F) const
+//-------------------------------------------------------------------------------------------------------------------
+// curr-to-rand/1.
+
+void CurrToRandOneMutation::operator()(Individual& mutant, const vector<Individual>& rands, const vector<double>params) const
 {
-    // Parameters.
     size_t numVariables = Individual::prob().numVariables();
-    size_t Psize = pop.size() / 2;
+    uniform_real_distribution<double> dis(0.0, 1.0);
 
-    Population parent(pop.begin(), pop.begin() + Psize);
-    vector<vector<size_t>> fronts = NondominatedSort(parent);
-
-    uniform_int_distribution<size_t> dis(0, fronts[0].size() - 1);
-
-    for (size_t pos = 0; pos < Psize; ++pos)
+    for (size_t i = 0; i < numVariables; ++i)
     {
-        // Get random individuals.
-        vector<int> index(Psize);
-        for (size_t i = 0; i < Psize; ++i)
+        if (dis(gen) < params[1])
         {
-            index[i] = i;
-        }
-        shuffle(index.begin(), index.end(), gen);
-
-        const Individual& r2 = pop[index[0]];
-        const Individual& r3 = pop[index[1]];
-
-        // Get best individual.
-        const Individual& best = pop[fronts[0][dis(gen)]];
-
-        // Create mutant vector.
-        const Individual& curr = pop[pos];
-        Individual& mutant = pop[Psize + pos];
-        for (size_t i = 0; i < Individual::prob().numVariables(); ++i)
-        {
-            mutant[i] = curr[i] + F * (curr[i] - best[i]) + F * (r2[i] - r3[i]);
+            mutant[i] = mutant[i] + params[0] * (mutant[i] - rands[0][i]) + params[0] * (rands[1][i] - rands[2][i]);
         }
     }
 }
 
-void CurrentToBestMutation::operator()(Population& pop) const
+//-------------------------------------------------------------------------------------------------------------------
+// curr-to-rand/2.
+
+void CurrToRandTwoMutation::operator()(Individual& mutant, const vector<Individual>& rands, const vector<double>params) const
 {
-    // Parameters.
     size_t numVariables = Individual::prob().numVariables();
-    size_t Psize = pop.size() / 2;
+    uniform_real_distribution<double> dis(0.0, 1.0);
 
-    Population parent(pop.begin(), pop.begin() + Psize);
-    vector<vector<size_t>> fronts = NondominatedSort(parent);
-
-    uniform_int_distribution<size_t> dis(0, fronts[0].size() - 1);
-
-    for (size_t pos = 0; pos < Psize; ++pos)
+    for (size_t i = 0; i < numVariables; ++i)
     {
-        // Get random individuals.
-        vector<int> index(Psize);
-        for (size_t i = 0; i < Psize; ++i)
+        if (dis(gen) < params[1])
         {
-            index[i] = i;
+            mutant[i] = mutant[i] + params[0] * (mutant[i] - rands[0][i]) + params[0] * (rands[1][i] - rands[2][i] + rands[3][i] - rands[4][i]);
         }
-        shuffle(index.begin(), index.end(), gen);
+    }
+}
 
-        const Individual& r2 = pop[index[0]];
-        const Individual& r3 = pop[index[1]];
+//-------------------------------------------------------------------------------------------------------------------
+// SBX.
 
-        // Get best individual.
-        const Individual& best = pop[fronts[0][dis(gen)]];
-        //Compromise comp;
-        //const Individual& best = pop[comp(pop)];
+void SBXMutation::operator()(Individual& child, const vector<Individual>& rands, const vector<double> params) const
+{
+    size_t numVariables = Individual::prob().numVariables();
+    uniform_real_distribution dis(0.0, 1.0);
 
-        // Create mutant vector.
-        const Individual& curr = pop[pos];
-        Individual& mutant = pop[Psize + pos];
-        for (size_t i = 0; i < Individual::prob().numVariables(); ++i)
+    for (size_t i = 0; i < numVariables; ++i)
+    {
+        double mu = dis(gen);
+        double beta;
+        if (mu <= 0.5)
         {
-            mutant[i] = curr[i] + curr.F() * (curr[i] - best[i]) + curr.F() * (r2[i] - r3[i]);
+            beta = pow(2 * mu, 1.0 / (params[0] + 1));
+        }
+        else
+        {
+            beta = pow(2 * (1 - mu), -1.0 / (params[0] + 1));
+        }
+
+        child[i] = 0.5 * ((1 + beta) * rands[0][i] + (1 - beta) * rands[1][i]);
+    }
+}
+
+//-------------------------------------------------------------------------------------------------------------------
+// NonLinear.
+
+void NonLinearMutation::operator()(Individual& child, const vector<Individual>& rands, const vector<double> params) const
+{
+    size_t numVariables = Individual::prob().numVariables();
+    uniform_real_distribution<double> dis(0.0, 1.0);
+
+    for (size_t i = 0; i < numVariables; ++i)
+    {
+        double r1 = dis(gen), r2 = dis(gen);
+
+        child[i] = rands[0][i] + r1 * (1 - pow(r2, -1.0 * pow(1 - params[0], 0.7))) * (rands[0][i] - rands[1][i]);
+    }
+}
+
+//-------------------------------------------------------------------------------------------------------------------
+// Current-to-best/1.
+
+void CurrToBestOneMutation::PartNeigh(Individual& mutant, const Population& parents, const vector<size_t> neighborhood, const vector<double> params) const
+{
+    RandomMatingSelection matingSelect;
+
+    vector<size_t> index = matingSelect(neighborhood, neighborhood.size());
+
+    vector<Individual> rands(nums_ + 1);
+
+    rands[0] = parents[size_t(params[2])];
+
+    size_t j = 0;
+    for (size_t i = 0; i < nums_; ++i)
+    {
+        while (index[j] == params[2])
+        {
+            j++;
+        }
+
+        rands[i + 1] = parents[index[j]];
+        j++;
+    }
+
+    (*this)(mutant, rands, params);
+}
+
+void CurrToBestOneMutation::operator()(Individual& mutant, const vector<Individual>& rands, const vector<double>params) const
+{
+    size_t numVariables = Individual::prob().numVariables();
+    uniform_real_distribution<double> dis(0.0, 1.0);
+
+    for (size_t i = 0; i < numVariables; ++i)
+    {
+        if (dis(gen) < params[1])
+        {
+            mutant[i] = mutant[i] + params[0] * (rands[0][i] - mutant[i]) + params[0] * (rands[1][i] - rands[2][i]);
+        }
+    }
+}
+
+//-------------------------------------------------------------------------------------------------------------------
+// Best/1.
+
+void BestOneMutation::PartNeigh(Individual& mutant, const Population& parents, const vector<size_t> neighborhood, const vector<double> params) const
+{
+    RandomMatingSelection matingSelect;
+
+    vector<size_t> index = matingSelect(neighborhood, neighborhood.size());
+
+    vector<Individual> rands(nums_ + 1);
+
+    rands[0] = parents[size_t(params[2])];
+
+    size_t j = 0;
+    for (size_t i = 0; i < nums_; ++i)
+    {
+        while (index[j] == params[2])
+        {
+            j++;
+        }
+
+        rands[i + 1] = parents[index[j]];
+        j++;
+    }
+
+    (*this)(mutant, rands, params);
+}
+
+void BestOneMutation::operator()(Individual& mutant, const vector<Individual>& rands, const vector<double>params) const
+{
+    size_t numVariables = Individual::prob().numVariables();
+    uniform_real_distribution<double> dis(0.0, 1.0);
+
+    for (size_t i = 0; i < numVariables; ++i)
+    {
+        if (dis(gen) < params[1])
+        {
+            mutant[i] = rands[0][i] + params[0] * (rands[1][i] - rands[2][i]);
         }
     }
 }
