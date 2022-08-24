@@ -48,11 +48,9 @@ void MOEADDE::Solve(Population& sol, const BProblem& prob, Log& log)
 
     RandOneMutation reproduct;
 
-    PolynamialMutation mutate;
+    PolynomialMutation mutate;
 
     BinaryCrossover crossover;
-
-    PolynamialMutation diversity;
 
     // Set parameters of reproductions.
     vector<double> params(2);
@@ -245,8 +243,10 @@ void MOEADDE::UpdateNeighbor(Population& pop, const Individual& ind, const size_
             size_t neighborIndex = neighborIndice_[index][order[i]];
             Individual& target = pop[neighborIndex];
 
-            double offspring = Tchebycheff(ind, weightVectors_[neighborIndex], referencePoint_, tmpNadir);
-            double parent = Tchebycheff(target, weightVectors_[neighborIndex], referencePoint_, tmpNadir);
+            //double offspring = Tchebycheff(ind, weightVectors_[neighborIndex], referencePoint_, tmpNadir);
+            //double parent = Tchebycheff(target, weightVectors_[neighborIndex], referencePoint_, tmpNadir);
+            double offspring = WeightedSum(ind, weightVectors_[neighborIndex], referencePoint_, tmpNadir);
+            double parent = WeightedSum(target, weightVectors_[neighborIndex], referencePoint_, tmpNadir);
 
             if (offspring <= parent)
             {

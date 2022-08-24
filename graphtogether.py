@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import copy
 import os
 
-INDEX = 0
+INDEX = 4
 
 x = [[40000, 60000], [2450000, 2600000], [650000, 750000]]
 y = [[15000, 30000], [290000, 330000], [300000, 500000]]
@@ -11,11 +11,11 @@ y = [[15000, 30000], [290000, 330000], [300000, 500000]]
 probSize = ['5', '6', '10', '15', '30', '40']
 probList = ["5_24_WOB", "6_24_WOB", "10_24_WOB", "15_24_WOB", "30_24_N", "40_24_N"]
 
-exp = "./Output/MOEADcompare/"
+exp = "./Output/aggregation/"
 
-algoName = ['MOEA/D', "MOEA/D-DRA"]
-algo1 = exp + 'origin/'
-algo2 = exp + 'DRA/'
+algoName = ['Weighted sum', "Tchebycheff"]
+algo1 = exp + 'weight/'
+algo2 = exp + 'tcheby/'
 
 rfPath = "./Indicator/IGD/" + probList[INDEX] + ".igd"
 
@@ -31,8 +31,8 @@ with open(rfPath, 'r') as rf:
     rf_c.append(float(obj[0]))
     rf_e.append(float(obj[1]))
 
-data1 = open(algo1 + probList[INDEX] + '/3.detail', 'r')
-data2 = open(algo2 + probList[INDEX] + "/13.detail", 'r')
+data1 = open(algo1 + probList[INDEX] + '/19.detail', 'r')
+data2 = open(algo2 + probList[INDEX] + "/3.detail", 'r')
 
 targetGeneration = 1000
 
@@ -58,8 +58,8 @@ for i in range(1000):
       data2.readline()
 
   if len(c1) != 0:
-    plt.rc('font', size=10)
-    plt.figure(dpi=600)
+    plt.rc('font', size=16)
+    plt.figure(figsize=(10, 6))
 
     plt.scatter(c1, e1, marker='x')
     plt.scatter(c2, e2, marker='o')

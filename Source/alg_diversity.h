@@ -3,7 +3,7 @@
 
 class Individual;
 
-class PolynamialMutation
+class PolynomialMutation
 {
 public:
     bool operator()(Individual& ind, const double pm = 0.1, const double eta = 20) const;

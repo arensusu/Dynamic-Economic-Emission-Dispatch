@@ -10,7 +10,7 @@
 
 using namespace std;
 
-bool PolynamialMutation::operator()(Individual& ind, const double pm, const double eta) const
+bool PolynomialMutation::operator()(Individual& ind, const double pm, const double eta) const
 {
     // Parameters.
     size_t numVariables = Individual::prob().numVariables();

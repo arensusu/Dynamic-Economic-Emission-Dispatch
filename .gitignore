@@ -19,3 +19,5 @@ Release/
 Output/
 MO/
 Source/TestProblem/
+*.py
+.gitignore

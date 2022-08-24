@@ -48,7 +48,7 @@ void JDE::Solve(Population& sol, const BProblem& prob, Log& log)
 
     EnvSelection envSelection;
 
-    PolynamialMutation diversity;
+    PolynomialMutation diversity;
 
     Population pop[2] = { Population(Psize_) };
     size_t curr = 0, next = 1;

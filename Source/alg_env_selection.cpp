@@ -31,7 +31,7 @@ size_t EnvSelection::PF(Population& next, Population& curr)
     {
         for (size_t j = 0; j < Individual::prob().numObjectives(); ++j)
         {
-            curr[i].modifiedObjs()[j] = curr[i].objs()[j] + 10000 * curr[i].violation();
+            curr[i].conv_objs()[j] = curr[i].objs()[j] + 10000 * curr[i].violation();
         }
     }
 

@@ -50,7 +50,7 @@ void MOEADOS::Solve(Population& sol, const BProblem& prob, Log& log)
 
     double FCR[] = { 0.1, 0.5, 0.9 };
 
-    PolynamialMutation mutate;
+    PolynomialMutation mutate;
 
     Population pop(Psize_), archive, children;
     size_t ffe = 0;
@@ -125,14 +125,14 @@ void MOEADOS::Solve(Population& sol, const BProblem& prob, Log& log)
                 subCounts_[subProblem] += 1;
 
                 int op = 0;
-                //if (ffe - Psize_ < Psize_)
-                //{
-                //    op = index[i + g * I.size()] % numOperators_;
-                //}
-                //else
-                //{
-                //    op = AOS(index[i + g * I.size()]);                 // Operator selection.
-                //}
+                if (ffe - Psize_ < Psize_)
+                {
+                    op = index[i + g * I.size()] % numOperators_;
+                }
+                else
+                {
+                    op = AOS(index[i + g * I.size()]);                 // Operator selection.
+                }
 
                 //
                 child = pop[subProblem];
@@ -172,12 +172,11 @@ void MOEADOS::Solve(Population& sol, const BProblem& prob, Log& log)
 
                 UpdateReference(child.objs());
 
-                //size_t nearest = FindSubproblem(child);
-                //bool isUpdate = UpdateNeighbor(pop, child, nearest, log);
                 bool isUpdate = UpdateNeighbor(pop, child, I[i], log);
 
                 double parent = Tchebycheff(pop[subProblem], weightVectors_[subProblem], referencePoint_, nadir_);
                 double offspring = Tchebycheff(child, weightVectors_[subProblem], referencePoint_, nadir_);
+                
                 double IR = (parent - offspring) / parent;
                 if (IR > 0)
                 {
@@ -370,7 +369,7 @@ void MOEADOS::CreditAssign()
     {
         for (size_t i = 0; i < numOperators_; ++i)
         {
-            probability_[i] = 0.1 + (1.0 - 0.1 * numOperators_) * (credits_[i] / creditSum);
+            probability_[i] = prmin_ + (1.0 - prmin_ * numOperators_) * (credits_[i] / creditSum);
         }
     }
     

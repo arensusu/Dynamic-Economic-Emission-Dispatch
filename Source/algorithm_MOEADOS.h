@@ -56,7 +56,8 @@ private:
     std::vector<int> subCounts_;
 
     // Operator selection.
-    double alpha_ = 0.5;
+    double alpha_ = 0.1;
+    double prmin_ = 0.0;
 
 };
 

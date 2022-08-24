@@ -47,7 +47,7 @@ void MOEADPPSDE::Solve(Population& sol, const BProblem& prob, Log& log)
 
     BinaryCrossover crossover;
 
-    PolynamialMutation diversity;
+    PolynomialMutation diversity;
 
     Population pop(Psize_), archive;
     size_t ffe = 0;

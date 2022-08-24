@@ -43,7 +43,7 @@ void NSGAOS::Solve(Population& sol, const BProblem& prob, Log& log)
     reproduct[1] = new BestOneMutation();
     reproduct[2] = new RandTwoMutation();
 
-    PolynamialMutation mutation;
+    PolynomialMutation mutation;
 
     EnvSelection env;
 

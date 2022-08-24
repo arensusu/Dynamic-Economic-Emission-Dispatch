@@ -75,6 +75,19 @@ double Tchebycheff(const Individual& ind, const vector<double>& weights, const v
     return max;
 }
 
+double WeightedSum(const Individual& ind, const std::vector<double>& weights,
+    const std::vector<double>& reference, const std::vector<double>& nadir)
+{
+    double total = 0.0;
+
+    for (size_t i = 0; i < ind.objs().size(); ++i)
+    {
+        total += weights[i] * (ind.objs()[i] - reference[i]) / (nadir[i] - reference[i]);
+    }
+
+    return total;
+}
+
 double WeightedSum(const Individual& ind, const vector<double>& weights)
 {
     double total = 0.0;

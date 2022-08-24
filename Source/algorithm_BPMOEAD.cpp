@@ -48,7 +48,7 @@ void BPMOEAD::Solve(Population& sol, const BProblem& prob, Log& log)
     reproduct[1] = new BestOneMutation();
     reproduct[2] = new RandTwoMutation();
 
-    PolynamialMutation mutate;
+    PolynomialMutation mutate;
 
     vector<Population> pop(numOperators_, Population(Psize_));
     Population archive(Psize_), children;

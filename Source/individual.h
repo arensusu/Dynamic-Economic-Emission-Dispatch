@@ -62,8 +62,8 @@ public:
     const double fitness() const { return fitness_; }
     double& fitness() { return fitness_; }
 
-    const std::vector<double>& modifiedObjs() const { return modifiedObjs_; }
-    std::vector<double>& modifiedObjs() { return modifiedObjs_; }
+    const std::vector<double>& conv_objs() const { return modifiedObjs_; }
+    std::vector<double>& conv_objs() { return modifiedObjs_; }
 
 protected:
     std::vector<double> encoding_;

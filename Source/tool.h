@@ -21,6 +21,9 @@ double Tchebycheff(const Individual& ind, const std::vector<double>& weights,
 
 double Tchebycheff(const Individual& ind, const std::vector<double>& weights, const std::vector<double>& reference);
 
+double WeightedSum(const Individual& ind, const std::vector<double>& weights,
+                   const std::vector<double>& reference, const std::vector<double>& nadir);
+
 double WeightedSum(const Individual& ind, const std::vector<double>& weights);
 
 std::size_t Tournament(const std::vector<double>& values, const std::size_t num);

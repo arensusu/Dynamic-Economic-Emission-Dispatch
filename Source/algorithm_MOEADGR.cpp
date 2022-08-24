@@ -30,11 +30,9 @@ void MOEADGR::Solve(Population& sol, const BProblem& prob, Log& log)
 
     RandOneMutation reproduct;
 
-    PolynamialMutation mutate;
+    PolynomialMutation mutate;
 
     BinaryCrossover crossover;
-
-    PolynamialMutation diversity;
 
     // Set parameters of reproductions.
     vector<double> params(2);
